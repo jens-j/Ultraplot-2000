@@ -9,8 +9,8 @@
 // X-axis
 #define SENSOR_X0  		20
 #define SENSOR_X1  		21
-#define SENSOR_INT  	19 
-#define MOTOR_X0    	11
+#define SENSOR_INT  	        19 
+#define MOTOR_X0    	        11
 #define MOTOR_X1 		10
 
 // Y-axis

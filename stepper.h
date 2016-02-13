@@ -2,42 +2,46 @@
 #define stepper_h
 
 
-const mState_t PHASE[8] = {{1,0,0,0},
-		                   {1,0,1,0},                    
-		                   {0,0,1,0},
-		                   {0,1,1,0},
-		                   {0,1,0,0},
-		                   {0,1,0,1},
-		                   {0,0,0,1},
-		                   {1,0,0,1}};
+#define N_PHASE		8
 
-// positions of the plotter head 
-enum position_t {UP = 0, DOWN = 1, MOVING = 2};
-
-typedef mState_s struct{
+typedef struct{
 	int s0;
 	int s1;
 	int s2;
 	int s3;
 } mState_t; 
 
+// positions of the plotter head 
+enum position_t {UP = 0, DOWN = 1, MOVING = 2};
+
+const mState_t PHASE[N_PHASE] = {{1,0,0,0},
+		                   		 {1,0,1,0},                    
+		                   		 {0,0,1,0},
+		                   		 {0,1,1,0},
+		                   		 {0,1,0,0},
+		                   		 {0,1,0,1},
+		                   		 {0,0,0,1},
+		                   		 {1,0,0,1}};
+
+
 class Stepper{
-	private:
+	protected:
 		int m0, m1, m2, m3; // Stepper pins
 		int state;
-		setState(mState_t state);
+		void setState(int);  
 	public:
-		mState_t getState();
-		stepLeft();
-		stepRight();
+		Stepper(int, int, int, int);
+		void stepLeft();
+		void stepRight();
 };
 
 class StepperZ : public Stepper{
 	private:
 		position_t position;
 	public:
+		StepperZ(int, int, int, int);
 		position_t getPosition();
-		setPosition(position_t pos);
+		void setPosition(position_t pos);
 };
 
 

@@ -2,7 +2,7 @@
 #include "sensor.h"
 
 // constructor
-Sensor::Sensor(callback_function_t function){
+Sensor::Sensor(callback_function_t isr){
 	s0 = SENSOR_X0;
 	s1 = SENSOR_X1;
 	attachInterrupt(SENSOR_X0, isr, CHANGE);
@@ -10,8 +10,8 @@ Sensor::Sensor(callback_function_t function){
 }
 
 // convert the sensor reading to an integer value
-static int Sensor::decode(sVal_t){
-	if(		data.s0 == 0 and data.s1 == 0)
+int Sensor::decode(sVal_t data){
+	if(     data.s0 == 0 and data.s1 == 0)
  		return 0;
  	else if(data.s0 == 0 and data.s1 == 1)
  		return 1;
@@ -27,6 +27,6 @@ sVal_t Sensor::readSensor(){
 }
 
 // read the sensor and return the decoded value
-sVal_t Sensor::decodeSensor(){
+int Sensor::decodeSensor(){
 	return Sensor::decode(readSensor());
 }
