@@ -11,13 +11,16 @@ typedef struct sVal_s{
 
 
 class Sensor{
-	private:
-		int s0, s1; // sensor pins
-	public:
-                Sensor(callback_function_t function);
-		int decode(sVal_t);
-		sVal_t readSensor();
-		int decodeSensor();
+  private:
+  public:
+    Sensor();
+    void isr();
+    void setCallback(callback_function_t function);
+    void removeCallback();
+    int getDirection();
+    int decode(sVal_t);
+    sVal_t readSensor();
+    int decodeSensor();
 };
 
 

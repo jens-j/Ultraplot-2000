@@ -2,22 +2,24 @@
 #define plotter_h
 
 
-/**********************************/
+/*********************************************************/
 /*	Pinout			    
-/**********************************/
+/*********************************************************/
 
 // X-axis
 #define SENSOR_X0  		20
 #define SENSOR_X1  		21
-#define SENSOR_INT  	        19 
-#define MOTOR_X0    	        11
-#define MOTOR_X1 		10
+#define SENSOR_INT              19 
+#define MOTOR_X0                10
+#define MOTOR_X1 		11
 
 // Y-axis
-#define MOTOR_Y0 		38
-#define MOTOR_Y1 		36
-#define MOTOR_Y2 		34
-#define MOTOR_Y3 		32
+#define BUTTON_Y0               8
+#define BUTTON_Y1               9 
+#define MOTOR_Y0 		5
+#define MOTOR_Y1 		4
+#define MOTOR_Y2 		3
+#define MOTOR_Y3 		2
 
 // Z-axis
 #define MOTOR_Z0 		46
@@ -26,12 +28,12 @@
 #define MOTOR_Z3 		52
 
 // LCD Display
-#define LCD_RS			51
-#define LCD_E			53
-#define LCD_D4			43
-#define LCD_D5			45
-#define LCD_D6			47
-#define LCD_D7			49
+#define LCD_RS			43
+#define LCD_E			45
+#define LCD_D4			47
+#define LCD_D5			49
+#define LCD_D6			51
+#define LCD_D7			53
 
 // Buttons
 #define BUTTON_UP 		35
@@ -44,16 +46,22 @@
 #define LED       		13
 
 
-/**********************************/
+/*********************************************************/
 /*	Constants			    
-/**********************************/
-#define X_SPEED   		75
+/*********************************************************/
+#define X_SPEED_MIN   		75
+#define X_SPEED_MAX   		110
 
 
-/**********************************/
+/*********************************************************/
 /*	Types			    
-/**********************************/
+/*********************************************************/
 typedef void (*callback_function_t)(void);
 
+
+/*********************************************************/
+/*	Functions			    
+/*********************************************************/
+int digitalPinToInterrupt(int);
 
 #endif
