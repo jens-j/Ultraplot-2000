@@ -1,6 +1,7 @@
 #include "plotter.h"
 #include "axis.h"
 
+X_axis x_axis = X_axis();
 Y_axis y_axis = Y_axis();
 Z_axis z_axis = Z_axis();
 
@@ -24,8 +25,13 @@ int digitalPinToInterrupt(int pin){
   }
 }
 
+void isrDispatcher(){
+  x_axis.isr();
+}
 
 void setup(){
+  pinMode(MOTOR_X0, OUTPUT);
+  pinMode(MOTOR_X1, OUTPUT);
   pinMode(MOTOR_Y0, OUTPUT);
   pinMode(MOTOR_Y1, OUTPUT);
   pinMode(MOTOR_Y2, OUTPUT);
@@ -34,21 +40,24 @@ void setup(){
   pinMode(MOTOR_Z1, OUTPUT);
   pinMode(MOTOR_Z2, OUTPUT);
   pinMode(MOTOR_Z3, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(SENSOR_X0), isrDispatcher, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(SENSOR_X1), isrDispatcher, CHANGE);
   Serial.begin(115200);
 }
 
 
 void loop(){
-//  delay(1000);
-//  z_axis.setPosition(DOWN);
-//  delay(1000);
-//  z_axis.setPosition(UP);
+  delay(100);
+  z_axis.setPosition(DOWN);
+  delay(100);
+  z_axis.setPosition(UP);
 
 
-//  y_axis.setPosition(1000);
-//  delay(100);
-//  y_axis.setPosition(0);
-//  delay(100);
+  y_axis.setPosition(4000);
+  delay(100);
+  y_axis.setPosition(0);
+  delay(100);
 
-
+  x_axis.setPosition(6000);
+  x_axis.setPosition(0);
 }
