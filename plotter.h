@@ -37,9 +37,9 @@
 
 // Buttons
 #define BUTTON_UP 		35
-#define BUTTON_DOWN 	27	
-#define BUTTON_LEFT 	33
-#define BUTTON_RIGHT 	29
+#define BUTTON_DOWN 	        27	
+#define BUTTON_LEFT 	        33
+#define BUTTON_RIGHT 	        29
 #define BUTTON_MID 		31
 
 // Other
@@ -49,8 +49,8 @@
 /*********************************************************/
 /*	Constants			    
 /*********************************************************/
-#define X_SPEED_MIN   		75
-#define X_SPEED_MAX   		110
+#define X_SPEED_MIN     80
+#define X_SPEED_MAX   	120
 
 
 /*********************************************************/

@@ -94,13 +94,15 @@ stepper(MOTOR_Y0, MOTOR_Y1, MOTOR_Y2, MOTOR_Y3, 100)
 void Y_axis::stepDown(){
   position--;
   if(digitalRead(BUTTON_Y1) == HIGH)
-    stepper.stepLeft();
+    stepper.stepRight();
+    delayMicroseconds(800);
 }
 
 void Y_axis::stepUp(){
   position++;
   if(digitalRead(BUTTON_Y0) == HIGH)
-    stepper.stepRight();
+    stepper.stepLeft();
+    delayMicroseconds(800);
 }
 
 int Y_axis::getPosition(){
@@ -108,14 +110,10 @@ int Y_axis::getPosition(){
 }
 
 void Y_axis::setPosition(int setPoint){
-  while(setPoint < position){
+  while(setPoint < position)
     stepDown();
-    delay(1);
-  }
-  while(setPoint > position){
+  while(setPoint > position)
     stepUp();
-    delay(1);	
-  }
 }
 
 void Y_axis::step_ISR(){
@@ -128,6 +126,7 @@ void Y_axis::step_ISR(){
 Z_axis::Z_axis() : 
 stepper(MOTOR_Z0, MOTOR_Z1, MOTOR_Z2, MOTOR_Z3, 255) 
 {
+  position = DOWN;
   setPosition(UP);
 }
 
