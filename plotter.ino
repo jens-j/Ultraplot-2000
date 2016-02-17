@@ -4,7 +4,11 @@
 #include "axis.h"
 #include "buttons.h"
 
-char cBuffer[20];
+#define N_MENU_ITEMS 4
+
+char lcdBuffer[20];
+const char MENU_TEXT[4][20] = {"A", "B", "C", "D"};
+int menuPosition = 0;
 
 X_axis x_axis = X_axis();
 Y_axis y_axis = Y_axis();
@@ -112,6 +116,21 @@ void drawCircle(int diameter){
   
 }
 
+void printMenu(){
+  int i;
+  //lcd.clear();
+  for(i = 0; i < N_MENU_ITEMS; i++){
+    lcd.setCursor(0, i);
+    if(i == menuPosition){
+      lcd.print(">");
+      lcd.print(MENU_TEXT[i]);
+    }
+    else{
+      lcd.print(" ");
+      lcd.print(MENU_TEXT[i]);
+    }
+  } 
+}
 
 void setup(){
   pinMode(MOTOR_X0, OUTPUT);
@@ -128,28 +147,31 @@ void setup(){
   attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);
   attachInterrupt(digitalPinToInterrupt(SENSOR_X1), sensorIsrDispatcher, CHANGE);
   // intitialize timer interrupt for the buttons
-  Timer1.initialize(20000); 
+  Timer1.initialize(BTN_DEBOUNCE_P * 1000); 
   Timer1.attachInterrupt(timerIsrDispatcher);
   Serial.begin(115200);
-  lcd.begin(16, 2);
-  // Print a message to the LCD.
-  lcd.setCursor(0, 0);
-  lcd.print("test");
+  lcd.begin(20, 4);
+//  lcd.setCursor(0, 3);
+//  lcd.print("  ");
+  printMenu();
 }
 
 
 void loop(){
-  lcd.setCursor(0, 1);
-  //sprintf(cBuffer, "button: %d", buttons.getLastPressed());
-  //lcd.print(cBuffer);
-  lcd.print(buttons.getLastPressed());
+  int command;
+
+  command = buttons.getButtonEvent();
+  if(command == BUTTON_DOWN)
+    menuPosition = (menuPosition + 1) % N_MENU_ITEMS;
+  if(command == BUTTON_UP)
+    menuPosition = (menuPosition == 0) ? N_MENU_ITEMS-1 : menuPosition-1;
+    
+  printMenu();
 
   //drawSinc();
   //drawCircle(1500);
   //while(1){delay(1);}
   
-  //lcd.setCursor(0, 1);
-  // print the number of seconds since reset:
-  //lcd.print(millis()/1000);
+  
   
 }

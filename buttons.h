@@ -7,12 +7,15 @@
 
 class Buttons{
   private:
+    int buttonEvent;
     int lastPressed;
+    int lastPressed0;
     int state0;
+    int retriggerCounter;
   public:
     Buttons();
     void isr();
-    int getLastPressed();
+    int getButtonEvent();
 };
 
 

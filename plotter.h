@@ -51,6 +51,8 @@
 /*********************************************************/
 #define X_SPEED_MIN     80
 #define X_SPEED_MAX   	120
+#define BTN_DEBOUNCE_P  20  // button debounce period in ms
+#define BTN_RETRIGGER_P 300 // button retrigger period in ms
 
 
 /*********************************************************/
