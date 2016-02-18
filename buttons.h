@@ -16,6 +16,7 @@ class Buttons{
     Buttons();
     void isr();
     int getButtonEvent();
+    void clearEvent();
 };
 
 

@@ -15,8 +15,8 @@ class Sensor{
   public:
     Sensor();
     void isr();
-    void setCallback(callback_function_t function);
-    void removeCallback();
+    //void setCallback(callback_function_t function);
+    //void removeCallback();
     int getDirection();
     int decode(sVal_t);
     sVal_t readSensor();

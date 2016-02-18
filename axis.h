@@ -6,10 +6,8 @@
 
 
 // positions of the plotter head 
-enum z_position_t {
-  UP = 0, DOWN = 1, MOVING = 2};
-enum x_direction_t {
-  LEFT = 0, RIGHT = 1, IDLE = 2};
+enum z_position_t  {UP, DOWN, MOVING};
+enum x_direction_t {LEFT, RIGHT, IDLE};
 
 
 class X_axis{

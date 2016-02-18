@@ -3,11 +3,25 @@
 #include "plotter.h"
 #include "axis.h"
 #include "buttons.h"
+#include "shapes.h"
 
-#define N_MENU_ITEMS 4
+//#define N_MAIN_MENU_ITEMS 3
+//#define N_DRAW_MENU_ITEMS 4
+
+
+const int  N_MENU_ENTRIES[2] = {4, 4};
+
+const char MAIN_MENU_TEXT[4][20] = {"Calibrate", 
+                                    "Move head up", 
+                                    "Move head down", 
+                                    "Draw"};
+const char DRAW_MENU_TEXT[4][20] = {"Sinc", 
+                                    "Circle", 
+                                    "Square",
+                                    "Back"};
 
 char lcdBuffer[20];
-const char MENU_TEXT[4][20] = {"A", "B", "C", "D"};
+menuSel_t menuSel = MENU_MAIN;
 int menuPosition = 0;
 
 X_axis x_axis = X_axis();
@@ -43,96 +57,34 @@ void timerIsrDispatcher(){
   buttons.isr(); 
 }
 
-void drawSinc(){
-  int i;
-  int y;
-  
-  z_axis.setPosition(UP);
-  x_axis.setPosition(-2000);
-  z_axis.setPosition(DOWN);
-  
-  for(i = -2000; i < 2000; i++){
-    x_axis.stepRight();
-    if(i != 0)
-      y = (1000 * sin((2 * 3.141 * i) / 200.0)) / (i/200.0);
-    y_axis.setPosition(y);
-  }
-  
-  z_axis.setPosition(UP);
-  x_axis.setPosition(0);
-}
-
-void drawCircle(int diameter){
-  int i;
-  double angle;
-  int x_pos;
-  
-  z_axis.setPosition(UP);
-  x_axis.setPosition(diameter);
-  z_axis.setPosition(DOWN);
-  
-  for(i = 1; i <= diameter; i++){
-    y_axis.stepUp();
-    angle = asin((double) i / (double) diameter);
-    x_pos = diameter * cos(angle);
-    x_axis.setPosition(x_pos);
-    Serial.print(-1 * i);
-    Serial.print(",");
-    Serial.println(x_pos);
-  } 
-
-  for(i = diameter; i >= 1; i--){
-    y_axis.stepDown();
-    angle = asin((double) i / (double) diameter);
-    x_pos = -1 * diameter * cos(angle);
-    x_axis.setPosition(x_pos);
-    Serial.print(-1 * i);
-    Serial.print(",");
-    Serial.println(x_pos);
-  } 
-  
-  for(i = 1; i <= diameter; i++){
-    y_axis.stepDown();
-    angle = asin((double) i / (double) diameter);
-    x_pos = -1 * diameter * cos(angle);
-    x_axis.setPosition(x_pos);
-    Serial.print(-1 * i);
-    Serial.print(",");
-    Serial.println(x_pos);    
-  } 
-  
-  for(i = diameter; i >= 1; i--){
-    y_axis.stepUp();
-    angle = asin((double) i / (double) diameter);
-    x_pos = diameter * cos(angle);
-    x_axis.setPosition(x_pos);
-    Serial.print(-1 * i);
-    Serial.print(",");
-    Serial.println(x_pos);
-  }
-  
-  z_axis.setPosition(UP);
-  x_axis.setPosition(0);
-  
-}
-
 void printMenu(){
   int i;
+  const char (*menu)[20];
+  
+  if(menuSel == MENU_MAIN){
+    menu = &MAIN_MENU_TEXT[0];
+  }
+  if(menuSel == MENU_DRAW){
+    menu = &DRAW_MENU_TEXT[0];
+  }
+  
   //lcd.clear();
-  for(i = 0; i < N_MENU_ITEMS; i++){
+  for(i = 0; i < N_MENU_ENTRIES[menuSel]; i++){
     lcd.setCursor(0, i);
     if(i == menuPosition){
       lcd.print(">");
-      lcd.print(MENU_TEXT[i]);
+      lcd.print(menu[i]);
     }
     else{
       lcd.print(" ");
-      lcd.print(MENU_TEXT[i]);
+      lcd.print(menu[i]);
     }
   } 
 }
 
 void setup(){
+
+  
   pinMode(MOTOR_X0, OUTPUT);
   pinMode(MOTOR_X1, OUTPUT);
   pinMode(MOTOR_Y0, OUTPUT);
@@ -143,16 +95,18 @@ void setup(){
   pinMode(MOTOR_Z1, OUTPUT);
   pinMode(MOTOR_Z2, OUTPUT);
   pinMode(MOTOR_Z3, OUTPUT);
+  
   // attach external interrupt for the sensor
   attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);
   attachInterrupt(digitalPinToInterrupt(SENSOR_X1), sensorIsrDispatcher, CHANGE);
+  
   // intitialize timer interrupt for the buttons
   Timer1.initialize(BTN_DEBOUNCE_P * 1000); 
+  Timer1.disablePwm(MOTOR_X1);
   Timer1.attachInterrupt(timerIsrDispatcher);
+
   Serial.begin(115200);
   lcd.begin(20, 4);
-//  lcd.setCursor(0, 3);
-//  lcd.print("  ");
   printMenu();
 }
 
@@ -161,17 +115,54 @@ void loop(){
   int command;
 
   command = buttons.getButtonEvent();
-  if(command == BUTTON_DOWN)
-    menuPosition = (menuPosition + 1) % N_MENU_ITEMS;
-  if(command == BUTTON_UP)
-    menuPosition = (menuPosition == 0) ? N_MENU_ITEMS-1 : menuPosition-1;
-    
-  printMenu();
-
-  //drawSinc();
-  //drawCircle(1500);
-  //while(1){delay(1);}
+  if(command == BUTTON_DOWN){
+    menuPosition = (menuPosition == N_MENU_ENTRIES[menuSel]-1) ? 0 : menuPosition+1;
+  }
+  if(command == BUTTON_UP){
+    menuPosition = (menuPosition == 0) ? N_MENU_ENTRIES[menuSel]-1 : menuPosition-1;
+  }
+  if(command == BUTTON_MID){   
+    switch(menuSel){
+      
+      case MENU_MAIN:
+        switch(menuPosition){
+          case 0:
+            break;
+          case 1:
+            z_axis.setPosition(UP);
+            break;
+          case 2:
+            z_axis.setPosition(DOWN);
+            break;
+          case 3:
+            menuSel = MENU_DRAW;
+            menuPosition = 0;
+            lcd.clear();
+        }
+        break;
+        
+        
+      case MENU_DRAW:
+        switch(menuPosition){
+          case 0:
+            drawSinc();
+            break;
+          case 1:
+            drawCircle(5000);
+            break;
+          case 2:
+            drawSquare(5000);
+            break;
+          case 3:
+            menuSel = MENU_MAIN;
+            menuPosition = 0;
+            lcd.clear();
+        }
+        break;
+    }
+  }
   
+  printMenu();
   
   
 }

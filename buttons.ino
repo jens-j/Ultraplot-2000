@@ -67,3 +67,7 @@ int Buttons::getButtonEvent(){
   buttonEvent = BUTTON_NONE;
   return ret; 
 }
+
+void Buttons::clearEvent(){
+  buttonEvent = BUTTON_NONE;   
+}

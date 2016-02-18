@@ -2,13 +2,16 @@
 #include "axis.h"
 #include "sensor.h"
 #include "stepper.h"
+#include "TimerOne.h"
 
 
 /*********************************************************/
 /*	X axis 			    
 /*********************************************************/
-X_axis::X_axis(){
-  sensor = Sensor();
+X_axis::X_axis() : 
+sensor() 
+{
+  //sensor = Sensor();
   sdata0 = 0;
   position = 0;
   setPoint = 0;
@@ -45,11 +48,18 @@ void X_axis::setSpeed(){
   else
     speed = 100;
    
-   if(direction == LEFT and position > setPoint)
+   if(direction == LEFT and position > setPoint){
      analogWrite(MOTOR_X0, speed);
-   else if(direction == RIGHT and position < setPoint)
+//     Serial.print("motor 0: ");
+//     Serial.println(speed);
+   }
+   else if(direction == RIGHT and position < setPoint){
      analogWrite(MOTOR_X1, speed);
+//     Serial.print("motor 1: ");
+//     Serial.println(speed);
+   }
    else{
+     Serial.println("done");
      analogWrite(MOTOR_X0, 0);
      analogWrite(MOTOR_X1, 0);
      direction = IDLE;
@@ -110,10 +120,12 @@ int Y_axis::getPosition(){
 }
 
 void Y_axis::setPosition(int setPoint){
-  while(setPoint < position)
+  while(setPoint < position){
     stepDown();
-  while(setPoint > position)
-    stepUp();
+  }
+  while(setPoint > position){
+    stepUp(); 
+  }
 }
 
 void Y_axis::step_ISR(){
