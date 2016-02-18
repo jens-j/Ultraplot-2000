@@ -71,3 +71,8 @@ int Buttons::getButtonEvent(){
 void Buttons::clearEvent(){
   buttonEvent = BUTTON_NONE;   
 }
+
+int Buttons::isPressed(){
+  return lastPressed;   
+}
+

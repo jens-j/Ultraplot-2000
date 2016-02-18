@@ -21,6 +21,7 @@ const char DRAW_MENU_TEXT[4][20] = {"Sinc",
                                     "Back"};
 
 char lcdBuffer[20];
+char cBuffer[100];
 menuSel_t menuSel = MENU_MAIN;
 int menuPosition = 0;
 
@@ -55,6 +56,140 @@ void sensorIsrDispatcher(){
 
 void timerIsrDispatcher(){
   buttons.isr(); 
+}
+
+void panic(char *s){
+  detachInterrupt(digitalPinToInterrupt(SENSOR_X0));
+  detachInterrupt(digitalPinToInterrupt(SENSOR_X1));
+  Timer1.detachInterrupt();
+  
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("[Panic!]");
+  
+  lcd.setCursor(0, 2);
+  lcd.print(s);
+
+  z_axis.setPosition(UP);
+  
+  while(1){}
+}
+
+void moveAbsolute(int setX, int setY){
+  int i;
+  int x = x_axis.getPosition();
+  int y = y_axis.getPosition();
+  int x0 = x;
+  int y0 = y;
+  int d_x = setX - x0;
+  int d_y = setY - y0;
+  double slope = (double) d_x / (double) d_y;
+  
+  if(d_x == 0){
+    y_axis.setPosition(setY);
+  }
+  else if(d_y == 0){
+    x_axis.setPosition(setX);
+  }
+  else{
+    while(y != setY){
+      
+      x_axis.setPosition(x0 + (int) ((y-y0) * slope));
+      
+      if(d_y < 0){
+        y_axis.stepDown();
+        y--;
+      }
+      else{
+        y_axis.stepUp();
+        y++;  
+      }
+      //sprintf(cBuffer, "(x,y) = (%d,%d)", x_axis.getPosition(), y_axis.getPosition());
+      //Serial.println(cBuffer);
+    }
+  }
+  x_axis.setPosition(setX);
+}
+
+void moveRelative(int x, int y){
+  moveAbsolute(x_axis.getPosition() + x, y_axis.getPosition() + y);  
+}
+
+void calibrate(){
+  int bound0, bound1;
+  int refresh = 0;
+  
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("[Calibration mode]");
+  
+  // X-axis
+  lcd.setCursor(0, 2);
+  lcd.print("set left x bound");
+  x_axis.setBounds(-10000, 10000);
+  while(buttons.getButtonEvent() != BUTTON_MID){
+    lcd.setCursor(0, 3);
+    lcd.print(x_axis.getPosition());
+    lcd.print("     ");
+    //delay(20);
+  }
+  bound0 = x_axis.getPosition();
+  lcd.setCursor(0, 2);
+  lcd.print("set right x bound");
+  while(buttons.getButtonEvent() != BUTTON_MID){
+    lcd.setCursor(0, 3);
+    lcd.print(x_axis.getPosition());
+    lcd.print("     ");
+    //delay(20);
+  }
+  bound1 = x_axis.getPosition();
+  x_axis.setBounds(bound0, bound1);
+  x_axis.initPosition((bound1 - bound0) / 2); 
+  x_axis.setPosition(0);
+  
+  // Y-axis
+  lcd.setCursor(0, 2);
+  lcd.print("set lower y bound");
+  y_axis.setBounds(-20000, 20000);
+  while(buttons.getButtonEvent() != BUTTON_MID){
+    if(buttons.isPressed() == BUTTON_LEFT){
+      y_axis.stepDown();  
+    }
+    if(buttons.isPressed() == BUTTON_RIGHT){
+      y_axis.stepUp();  
+    }
+    if(millis() - refresh > 50){
+      lcd.setCursor(0, 3);
+      lcd.print("<- ");
+      lcd.print(y_axis.getPosition());
+      lcd.print(" ->  ");
+      refresh = millis();
+    }
+  }  
+  bound0 = y_axis.getPosition();
+  lcd.setCursor(0, 2);
+  lcd.print("set upper y bound");
+  while(buttons.getButtonEvent() != BUTTON_MID){
+    if(buttons.isPressed() == BUTTON_LEFT){
+      y_axis.stepDown();  
+    }
+    if(buttons.isPressed() == BUTTON_RIGHT){
+      y_axis.stepUp();  
+    }
+    if(millis() - refresh > 50){
+      lcd.setCursor(0, 3);
+      lcd.print("<- ");
+      lcd.print(y_axis.getPosition());
+      lcd.print(" ->  ");
+      refresh = millis();
+    }
+  }  
+  bound1 = y_axis.getPosition();
+  y_axis.setBounds(bound0, bound1);
+  y_axis.initPosition((bound1 - bound0) / 2); 
+  y_axis.setPosition(0);
+  
+  lcd.clear();
 }
 
 void printMenu(){
@@ -127,6 +262,7 @@ void loop(){
       case MENU_MAIN:
         switch(menuPosition){
           case 0:
+            calibrate();
             break;
           case 1:
             z_axis.setPosition(UP);
@@ -145,12 +281,18 @@ void loop(){
       case MENU_DRAW:
         switch(menuPosition){
           case 0:
-            drawSinc();
+            sprintf(cBuffer, "(x,y) = (%d,%d)", x_axis.getPosition(), y_axis.getPosition());
+            Serial.print(cBuffer);
+            drawSinc(2000);
             break;
           case 1:
+            sprintf(cBuffer, "(x,y) = (%d,%d)", x_axis.getPosition(), y_axis.getPosition());
+            Serial.print(cBuffer);
             drawCircle(5000);
             break;
           case 2:
+            sprintf(cBuffer, "(x,y) = (%d,%d)", x_axis.getPosition(), y_axis.getPosition());
+            Serial.print(cBuffer);
             drawSquare(5000);
             break;
           case 3:
@@ -163,6 +305,5 @@ void loop(){
   }
   
   printMenu();
-  
-  
+
 }

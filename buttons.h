@@ -17,6 +17,7 @@ class Buttons{
     void isr();
     int getButtonEvent();
     void clearEvent();
+    int isPressed();
 };
 
 

@@ -6,7 +6,7 @@
 
 
 // positions of the plotter head 
-enum z_position_t  {UP, DOWN, MOVING};
+enum z_position_t  {UP, DOWN, MID, MOVING, UNKNOWN};
 enum x_direction_t {LEFT, RIGHT, IDLE};
 
 
@@ -15,8 +15,11 @@ class X_axis{
   int position;
   int setPoint;
   x_direction_t direction;
+  int leftBound;
+  int rightBound;
   Sensor sensor;
   void setSpeed();
+  unsigned long stall_time;
   
 public:
   X_axis();
@@ -25,11 +28,16 @@ public:
   void stepRight();
   int getPosition();
   void setPosition(int);
+  void quickSetPosition(int);
+  void setBounds(int, int);
+  void initPosition(int);
 };
 
 
 class Y_axis{
   int position;
+  int upperBound;
+  int lowerBound;
   Stepper stepper;
   void step_ISR();
 public:
@@ -38,6 +46,8 @@ public:
   void stepDown();
   int getPosition();
   void setPosition(int);
+  void setBounds(int, int);
+  void initPosition(int);
 };
 
 

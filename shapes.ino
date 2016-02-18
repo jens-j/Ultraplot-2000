@@ -5,18 +5,19 @@ extern X_axis x_axis;
 extern Y_axis y_axis;
 extern Z_axis z_axis;
 
-void drawSinc(){
+void drawSinc(int size){
   int i;
   int y;
   
   z_axis.setPosition(UP);
-  x_axis.setPosition(-2000);
+  x_axis.setPosition(-size);
   z_axis.setPosition(DOWN);
   
-  for(i = -2000; i < 2000; i++){
+  for(i = -size; i < size; i++){
     x_axis.stepRight();
-    if(i != 0)
-      y = (1000 * sin((2 * 3.141 * i) / 200.0)) / (i/200.0);
+    if(i != 0){
+      y = ((size / 2) * sin((2 * 3.141 * i) / ((double) size / 10))) / (i / ((double) size / 10));
+    }
     y_axis.setPosition(y);
   }
   
@@ -94,10 +95,4 @@ size = size / 2;
   y_axis.setPosition(0);  
 }
 
-void drawLineAbsolute(int, int){
 
-}
-
-void drawLineRelative(int, int){
-
-}

@@ -2,10 +2,8 @@
 #define shapes_h
 
 
-void drawSinc();
+void drawSinc(int);
 void drawCircle(int);
 void drawSquare(int);
-void drawLineAbsolute(int, int);
-void drawLineRelative(int, int);
 
 #endif;
