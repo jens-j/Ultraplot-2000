@@ -55,10 +55,13 @@
 #define X_SPEED_MAX   	120
 #define BTN_DEBOUNCE_P  20  // button debounce period in ms
 #define BTN_RETRIGGER_P 300 // button retrigger period in ms
-#define XY_SCALE        1.673
-#define YX_SCALE        0.598
+#define X_RESOLUTION    0.0353 // in mm
+#define Y_RESOLUTION    0.0212 // in mm
+#define XY_SCALE        (X_RESOLUTION / Y_RESOLUTION)
+#define YX_SCALE        (Y_RESOLUTION / X_RESOLUTION)
 #define Y_STEPPER_PWM   100
 #define X_COOLDOWN      2000 // in us
+#define Y_COOLDOWN      1200 // in us
 
 /*********************************************************/
 /*	Types			    
@@ -71,6 +74,7 @@ enum menuSel_t {MENU_MAIN = 0, MENU_DRAW = 1};
 /*********************************************************/
 int digitalPinToInterrupt(int);
 void panic(char *s);
+void moveAbsolute(int, int);
 
 /*********************************************************/
 /*	Global variables			    

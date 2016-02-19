@@ -10,7 +10,7 @@ void drawSinc(int size){
   int y;
   
   z_axis.setPosition(UP);
-  x_axis.setPosition(-size);
+  quickAbsolute(-size,0);
   z_axis.setPosition(DOWN);
   
   for(i = -size; i < size; i++){
@@ -22,7 +22,7 @@ void drawSinc(int size){
   }
   
   z_axis.setPosition(UP);
-  x_axis.setPosition(0);
+  quickAbsolute(0, 0);
 }
 
 void drawCircle(int diameter){
@@ -33,7 +33,7 @@ int i;
   diameter = diameter / 2;
   
   z_axis.setPosition(UP);
-  x_axis.setPosition(diameter * YX_SCALE);
+  quickAbsolute((diameter * YX_SCALE), 0);
   z_axis.setPosition(DOWN);
   
   for(i = 1; i <= diameter; i++){
@@ -77,22 +77,20 @@ int i;
   }
   
   z_axis.setPosition(UP);
-  x_axis.setPosition(0);
+  quickAbsolute(0, 0);
 }
 
 void drawSquare(int size){
-size = size / 2;
+  size = size / 2;
   z_axis.setPosition(UP);
-  x_axis.setPosition(-1 * size);
-  y_axis.setPosition(-1 * size * XY_SCALE);
+  quickAbsolute(-1 * size, -1 * size);
   z_axis.setPosition(DOWN);
-  x_axis.setPosition(size);  
-  y_axis.setPosition(size * XY_SCALE);
-  x_axis.setPosition(-1 * size);
-  y_axis.setPosition(-1 * size * XY_SCALE);
+  moveAbsolute(size, -1 * size);
+  moveAbsolute(size, size);
+  moveAbsolute(-1 * size, size);
+  moveAbsolute(-1 * size, -1 * size);
   z_axis.setPosition(UP);
-  x_axis.setPosition(0);
-  y_axis.setPosition(0);  
+  quickAbsolute(0, 0);
 }
 
 

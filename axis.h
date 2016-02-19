@@ -9,17 +9,20 @@
 enum z_position_t  {UP, DOWN, MID, MOVING, UNKNOWN};
 enum x_direction_t {LEFT, RIGHT, IDLE};
 
+typedef struct bounds_s{
+  int b0;
+  int b1;
+}bounds_t;
 
 class X_axis{
   int sdata0;
   int position;
   int setPoint;
   x_direction_t direction;
-  int leftBound;
-  int rightBound;
+  bounds_t bounds;
+  unsigned long cooldownTime;
   Sensor sensor;
   void setSpeed();
-  unsigned long stall_time;
   
 public:
   X_axis();
@@ -29,15 +32,17 @@ public:
   int getPosition();
   void setPosition(int);
   void quickSetPosition(int);
-  void setBounds(int, int);
+  void setBounds(bounds_t);
+  bounds_t getBounds();
   void initPosition(int);
+  void stop();
 };
 
 
 class Y_axis{
   int position;
-  int upperBound;
-  int lowerBound;
+  bounds_t bounds;
+  unsigned long cooldownTime;
   Stepper stepper;
   void step_ISR();
 public:
@@ -46,7 +51,8 @@ public:
   void stepDown();
   int getPosition();
   void setPosition(int);
-  void setBounds(int, int);
+  void setBounds(bounds_t);
+  bounds_t getBounds();
   void initPosition(int);
 };
 

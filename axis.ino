@@ -13,9 +13,8 @@ X_axis::X_axis() : sensor() {
   position = 0;
   setPoint = 0;
   direction = IDLE;
-  leftBound = -4000;
-  rightBound = 4000;
-  stall_time = micros();
+  bounds = {-4000, 4000};
+  cooldownTime = micros();
 }
 
 void X_axis::isr(){
@@ -26,10 +25,10 @@ void X_axis::isr(){
   else
     position--; 
     
-  if(position < leftBound){
+  if(position < bounds.b0){
     panic("x < SW bound");
   }
-  if(position > rightBound){
+  if(position > bounds.b1){
     panic("x > SW bound");
   }  
     
@@ -64,7 +63,7 @@ void X_axis::setSpeed(){
        //Serial.println("overshot");
      }
      else{
-       stall_time = micros();
+       cooldownTime = micros();
        direction = IDLE;
      }
    }
@@ -84,7 +83,7 @@ int X_axis::getPosition(){
 
 void X_axis::setPosition(int setp){
   
-  while(direction != IDLE || (micros() - stall_time) < X_COOLDOWN){
+  while(direction != IDLE || (micros() - cooldownTime) < X_COOLDOWN){
     delayMicroseconds(1);
   }
   quickSetPosition(setp);
@@ -104,15 +103,16 @@ void X_axis::quickSetPosition(int setp){
   } 
 }
 
-void X_axis::setBounds(int left, int right){
-  leftBound = left;
-  rightBound = right;  
-//  sprintf(cBuffer, "(lb,rb) = (%d,%d)", leftBound, rightBound);
-//  Serial.println(cBuffer);
+void X_axis::setBounds(bounds_t b){
+  bounds = b;  
 }
 
 void X_axis::initPosition(int pos){
   position = pos; 
+}
+
+bounds_t X_axis::getBounds(){
+  return bounds;
 }
 
 /*********************************************************/
@@ -122,30 +122,32 @@ Y_axis::Y_axis() :
 stepper(MOTOR_Y0, MOTOR_Y1, MOTOR_Y2, MOTOR_Y3, Y_STEPPER_PWM)
 {
   position = 0;
-  upperBound = 6000;
-  lowerBound = -6000;
+  bounds = {6000,-6000};
+  cooldownTime = micros();
 }
 
 void Y_axis::stepDown(){
-  if(--position < lowerBound){
+  if(--position < bounds.b0){
     panic("y < SW bound"); 
   }
   if(digitalRead(BUTTON_Y1) == LOW){
     panic("y < HW bound");
   }
+  while((micros() - cooldownTime) < Y_COOLDOWN){}
   stepper.stepRight();
-  delayMicroseconds(800);
+  cooldownTime = micros();
 }
 
 void Y_axis::stepUp(){
-  if(++position > upperBound){
+  if(++position > bounds.b1){
     panic("y > SW bound"); 
   }
   if(digitalRead(BUTTON_Y0) == LOW){
       panic("y > HW bound");
   }
+  while((micros() - cooldownTime) < Y_COOLDOWN){}
   stepper.stepLeft();
-  delayMicroseconds(800);
+  cooldownTime = micros();
 }
 
 int Y_axis::getPosition(){
@@ -161,13 +163,16 @@ void Y_axis::setPosition(int setPoint){
   }
 }
 
-void Y_axis::setBounds(int lower, int upper){
-  upperBound = upper;
-  lowerBound = lower;  
+void Y_axis::setBounds(bounds_t b){
+  bounds = b;
 }
 
 void Y_axis::initPosition(int pos){
   position = pos; 
+}
+
+bounds_t Y_axis::getBounds(){
+  return bounds;
 }
 
 

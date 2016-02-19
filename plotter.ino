@@ -63,6 +63,9 @@ void panic(char *s){
   detachInterrupt(digitalPinToInterrupt(SENSOR_X1));
   Timer1.detachInterrupt();
   
+  digitalWrite(MOTOR_X0, LOW);
+  digitalWrite(MOTOR_X1, LOW);
+  
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("[Panic!]");
@@ -73,6 +76,11 @@ void panic(char *s){
   z_axis.setPosition(UP);
   
   while(1){}
+}
+
+void quickAbsolute(int setX, int setY){
+  x_axis.setPosition(setX);
+  y_axis.setPosition(setY);
 }
 
 void moveAbsolute(int setX, int setY){
@@ -104,8 +112,6 @@ void moveAbsolute(int setX, int setY){
         y_axis.stepUp();
         y++;  
       }
-      //sprintf(cBuffer, "(x,y) = (%d,%d)", x_axis.getPosition(), y_axis.getPosition());
-      //Serial.println(cBuffer);
     }
   }
   x_axis.setPosition(setX);
@@ -116,7 +122,9 @@ void moveRelative(int x, int y){
 }
 
 void calibrate(){
-  int bound0, bound1;
+  int xbound0, xbound1;
+  int ybound0, ybound1;
+  int xrange, yrange;
   int refresh = 0;
   
   lcd.clear();
@@ -126,31 +134,37 @@ void calibrate(){
   // X-axis
   lcd.setCursor(0, 2);
   lcd.print("set left x bound");
-  x_axis.setBounds(-10000, 10000);
+  x_axis.setBounds({-10000, 10000});
   while(buttons.getButtonEvent() != BUTTON_MID){
     lcd.setCursor(0, 3);
     lcd.print(x_axis.getPosition());
     lcd.print("     ");
-    //delay(20);
   }
-  bound0 = x_axis.getPosition();
+  xbound0 = x_axis.getPosition();
   lcd.setCursor(0, 2);
   lcd.print("set right x bound");
   while(buttons.getButtonEvent() != BUTTON_MID){
     lcd.setCursor(0, 3);
     lcd.print(x_axis.getPosition());
     lcd.print("     ");
-    //delay(20);
   }
-  bound1 = x_axis.getPosition();
-  x_axis.setBounds(bound0, bound1);
-  x_axis.initPosition((bound1 - bound0) / 2); 
+  xbound1 = x_axis.getPosition();
+  xrange = xbound1 - xbound0;
+  if(xrange & 1){
+    x_axis.setBounds({-1 * xrange / 2, xrange / 2});
+    x_axis.initPosition(xrange / 2); 
+  }
+  else{
+    x_axis.setBounds({-1 * xrange / 2, xrange / 2 - 1});
+    x_axis.initPosition(xrange / 2 - 1); 
+  }
   x_axis.setPosition(0);
+  
   
   // Y-axis
   lcd.setCursor(0, 2);
   lcd.print("set lower y bound");
-  y_axis.setBounds(-20000, 20000);
+  y_axis.setBounds({-20000, 20000});
   while(buttons.getButtonEvent() != BUTTON_MID){
     if(buttons.isPressed() == BUTTON_LEFT){
       y_axis.stepDown();  
@@ -158,7 +172,7 @@ void calibrate(){
     if(buttons.isPressed() == BUTTON_RIGHT){
       y_axis.stepUp();  
     }
-    if(millis() - refresh > 50){
+    if(millis() - refresh > 100){
       lcd.setCursor(0, 3);
       lcd.print("<- ");
       lcd.print(y_axis.getPosition());
@@ -166,7 +180,7 @@ void calibrate(){
       refresh = millis();
     }
   }  
-  bound0 = y_axis.getPosition();
+  ybound0 = y_axis.getPosition();
   lcd.setCursor(0, 2);
   lcd.print("set upper y bound");
   while(buttons.getButtonEvent() != BUTTON_MID){
@@ -176,7 +190,7 @@ void calibrate(){
     if(buttons.isPressed() == BUTTON_RIGHT){
       y_axis.stepUp();  
     }
-    if(millis() - refresh > 50){
+    if(millis() - refresh > 100){
       lcd.setCursor(0, 3);
       lcd.print("<- ");
       lcd.print(y_axis.getPosition());
@@ -184,10 +198,35 @@ void calibrate(){
       refresh = millis();
     }
   }  
-  bound1 = y_axis.getPosition();
-  y_axis.setBounds(bound0, bound1);
-  y_axis.initPosition((bound1 - bound0) / 2); 
+  ybound1 = y_axis.getPosition();
+  yrange = ybound1- ybound0;
+  if(yrange & 1){
+    y_axis.setBounds({-1 * yrange / 2, yrange / 2});
+    y_axis.initPosition(yrange / 2); 
+  }
+  else{
+    y_axis.setBounds({-1 * xrange / 2, yrange / 2 - 1});
+    y_axis.initPosition(yrange / 2 - 1); 
+  }
   y_axis.setPosition(0);
+  
+  // Overview
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Calibration results:");
+  lcd.setCursor(0, 1);
+  sprintf(lcdBuffer, "X: [%d,%d]", x_axis.getBounds().b0, x_axis.getBounds().b1);
+  lcd.print(lcdBuffer);
+  lcd.setCursor(0, 2);
+  sprintf(lcdBuffer, "Y: [%d,%d]", y_axis.getBounds().b0, y_axis.getBounds().b1);
+  lcd.print(lcdBuffer);
+  lcd.setCursor(0, 3);
+  sprintf(lcdBuffer, "%umm x %umm", (unsigned int) (xrange * X_RESOLUTION), (unsigned int) (yrange * Y_RESOLUTION));
+  lcd.print(lcdBuffer);
+  
+  while(buttons.getButtonEvent() != BUTTON_MID){
+    delayMicroseconds(1);
+  }
   
   lcd.clear();
 }
