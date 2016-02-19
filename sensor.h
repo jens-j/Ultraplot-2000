@@ -1,7 +1,7 @@
 #ifndef sensor_h
 #define sensor_h
 
-#include "plotter.h"
+#include "ultraPlot2000.h"
 
 // sensor value datatype
 typedef struct sVal_s{

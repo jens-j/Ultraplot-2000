@@ -1,4 +1,5 @@
-#include "plotter.h"
+#include "Arduino.h"
+#include "ultraPlot2000.h"
 #include "buttons.h"
 
 

@@ -1,7 +1,7 @@
 #ifndef buttons_h
 #define buttons_h
 
-#include "plotter.h"
+#include "ultraPlot2000.h"
 
 #define BUTTON_NONE 	0
 
