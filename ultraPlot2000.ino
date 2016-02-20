@@ -245,57 +245,68 @@ void setup(){
 
 
 void loop(){
-  int command;
-
-  command = buttons.getButtonEvent();
-  if(command == BUTTON_DOWN){
-    menuPosition = (menuPosition == N_MENU_ENTRIES[menuSel]-1) ? 0 : menuPosition+1;
-  }
-  if(command == BUTTON_UP){
-    menuPosition = (menuPosition == 0) ? N_MENU_ENTRIES[menuSel]-1 : menuPosition-1;
-  }
-  if(command == BUTTON_MID){   
-    switch(menuSel){
-      
-      case MENU_MAIN:
-        switch(menuPosition){
-          case 0:
-            calibrate();
-            break;
-          case 1:
-            plotter.moveHeadUp();
-            break;
-          case 2:
-            plotter.moveHeadDown();
-            break;
-          case 3:
-            menuSel = MENU_DRAW;
-            menuPosition = 0;
-            lcd.clear();
-        }
-        break;
-        
-        
-      case MENU_DRAW:
-        switch(menuPosition){
-          case 0:
-            drawSinc(2000);
-            break;
-          case 1:
-            drawCircle(5000);
-            break;
-          case 2:
-            drawSquare(5000);
-            break;
-          case 3:
-            menuSel = MENU_MAIN;
-            menuPosition = 0;
-            lcd.clear();
-        }
-        break;
-    }
-  }
   
-  printMenu();
+  //drawCircle(20);
+  plotter.moveHeadDown();
+  
+  plotter.moveAbsolute(20.0, 20.0);
+  plotter.arcAbsoluteCCW(-20.0, 20.0, -20.0, 0.0);
+  plotter.arcAbsoluteCCW(20.0, 20.0, 20.0, 0.0);
+
+  plotter.moveHeadUp();
+  plotter.quickAbsolute(0, 0);
+  while(1){delayMicroseconds(1);}
+//  int command;
+//
+//  command = buttons.getButtonEvent();
+//  if(command == BUTTON_DOWN){
+//    menuPosition = (menuPosition == N_MENU_ENTRIES[menuSel]-1) ? 0 : menuPosition+1;
+//  }
+//  if(command == BUTTON_UP){
+//    menuPosition = (menuPosition == 0) ? N_MENU_ENTRIES[menuSel]-1 : menuPosition-1;
+//  }
+//  if(command == BUTTON_MID){   
+//    switch(menuSel){
+//      
+//      case MENU_MAIN:
+//        switch(menuPosition){
+//          case 0:
+//            calibrate();
+//            break;
+//          case 1:
+//            plotter.moveHeadUp();
+//            break;
+//          case 2:
+//            plotter.moveHeadDown();
+//            break;
+//          case 3:
+//            menuSel = MENU_DRAW;
+//            menuPosition = 0;
+//            lcd.clear();
+//        }
+//        break;
+//        
+//        
+//      case MENU_DRAW:
+//        switch(menuPosition){
+//          case 0:
+//            drawSinc(2000);
+//            break;
+//          case 1:
+//            drawCircle(5000);
+//            break;
+//          case 2:
+//            drawSquare(5000);
+//            break;
+//          case 3:
+//            menuSel = MENU_MAIN;
+//            menuPosition = 0;
+//            lcd.clear();
+//        }
+//        break;
+//    }
+//  }
+//  
+//  printMenu();
 
 }

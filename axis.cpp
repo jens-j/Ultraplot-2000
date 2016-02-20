@@ -11,7 +11,8 @@
 /*********************************************************/
 X_axis::X_axis() : sensor() {
   sdata0 = 0;
-  position = 0;
+  vPosition = 0;
+  rPosition = 0;
   setPoint = 0;
   direction = IDLE;
   bounds = {-4000, 4000};
@@ -19,28 +20,32 @@ X_axis::X_axis() : sensor() {
 }
 
 void X_axis::isr(){
+  //char cBuffer[100];
   int sdata = sensor.decodeSensor();
   
   if(sdata - sdata0 == 1 || sdata - sdata0 == -3)
-    position++;
+    rPosition++;
   else
-    position--; 
+    rPosition--; 
     
-  if(position < bounds.b0){
+  if(rPosition < bounds.b0){
     panic("x < SW bound");
   }
-  if(position > bounds.b1){
+  if(rPosition > bounds.b1){
     panic("x > SW bound");
   }  
     
   setSpeed();
+  
+  //sprintf(cBuffer, "x = %d", rPosition);
+  //Serial.println(cBuffer);
   
   sdata0 = sdata;  
 }
 
 void X_axis::setSpeed(){
   int speed;
-  int diff = abs(setPoint - position);
+  int diff = abs(setPoint - rPosition);
   
   if(diff < 10)
     speed = 75;
@@ -51,10 +56,10 @@ void X_axis::setSpeed(){
   else
     speed = 100;
    
-   if(direction == LEFT and position > setPoint){
+   if(direction == LEFT and rPosition > setPoint){
      analogWrite(MOTOR_X0, speed);
    }
-   else if(direction == RIGHT and position < setPoint){
+   else if(direction == RIGHT and rPosition < setPoint){
      analogWrite(MOTOR_X1, speed);
    }
    else{
@@ -79,26 +84,39 @@ void X_axis::stepRight(){
 }
 
 int X_axis::getPosition(){
-  return position;
+  // wait for any moves to complete
+  while(direction != IDLE){
+    delayMicroseconds(1);
+  }
+  // convert physical to virtual coordinates
+  return vPosition;
 }
 
 void X_axis::setPosition(int setp){
-  
+  //char cBuffer[100];
   while(direction != IDLE || (micros() - cooldownTime) < X_COOLDOWN){
     delayMicroseconds(1);
   }
+  
+  //sprintf(cBuffer, "set x (%d)", setp);
+  //Serial.println(cBuffer);
+  
   quickSetPosition(setp);
 }
 
 void X_axis::quickSetPosition(int setp){
-  setPoint = setp;
+  
+  vPosition = setp;
+  
+  // convert virtual to physical coordinates
+  setPoint = (int) (setp * YX_SCALE);
    
   direction = IDLE;
-  if(position > setPoint){
+  if(rPosition > setPoint){
     direction = LEFT;
     setSpeed();
   }
-  else if(position < setPoint){
+  else if(rPosition < setPoint){
     direction = RIGHT;
     setSpeed(); 
   } 
@@ -109,11 +127,16 @@ void X_axis::setBounds(bounds_t b){
 }
 
 void X_axis::initPosition(int pos){
-  position = pos; 
+  rPosition = pos; 
+  vPosition = (int) (pos * XY_SCALE);
 }
 
 bounds_t X_axis::getBounds(){
   return bounds;
+}
+
+x_direction_t X_axis::getDirection(){
+  return direction; 
 }
 
 /*********************************************************/
@@ -126,6 +149,7 @@ stepper(MOTOR_Y0, MOTOR_Y1, MOTOR_Y2, MOTOR_Y3, Y_STEPPER_PWM)
   bounds = {-6000,6000};
   cooldownTime = micros();
 }
+
 
 void Y_axis::stepDown(){
   if(--position < bounds.b0){
@@ -148,7 +172,7 @@ void Y_axis::stepUp(){
   }
   while((micros() - cooldownTime) < Y_COOLDOWN){}
   stepper.stepLeft();
-  cooldownTime = micros();
+  cooldownTime = micros(); 
 }
 
 int Y_axis::getPosition(){
@@ -156,6 +180,7 @@ int Y_axis::getPosition(){
 }
 
 void Y_axis::setPosition(int setPoint){
+  
   while(setPoint < position){
     stepDown();
   }

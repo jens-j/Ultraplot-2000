@@ -20,7 +20,6 @@ void Buttons::isr(){
     lastPressed = BUTTON_UP;
     if(!(state0 & 0x01)){
       buttonEvent = BUTTON_UP;
-      Serial.println("a");
     }
   }
   if(digitalRead(BUTTON_DOWN) == LOW){
@@ -28,7 +27,6 @@ void Buttons::isr(){
     lastPressed = BUTTON_DOWN;
     if(!(state0 & 0x02)){
       buttonEvent = BUTTON_DOWN;
-      Serial.println("b");
     }
   }
   if(digitalRead(BUTTON_LEFT) == LOW){

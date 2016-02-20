@@ -16,10 +16,11 @@ typedef struct bounds_s{
 
 class X_axis{
   int sdata0;
-  int position;
-  int setPoint;
+  int vPosition;
+  int rPosition;
+  int setPoint;    // in real coordinates
+  bounds_t bounds; // in real coordinates
   x_direction_t direction;
-  bounds_t bounds;
   unsigned long cooldownTime;
   Sensor sensor;
   void setSpeed();
@@ -36,11 +37,12 @@ public:
   bounds_t getBounds();
   void initPosition(int);
   void stop();
+  x_direction_t getDirection();
 };
 
 
 class Y_axis{
-  int position;
+  int position; 
   bounds_t bounds;
   unsigned long cooldownTime;
   Stepper stepper;

@@ -39,7 +39,7 @@ int i;
   for(i = 1; i <= diameter; i++){
     plotter.y_axis.stepUp();
     angle = asin((double) i / (double) diameter);
-    x_pos = diameter * cos(angle) * YX_SCALE;
+    x_pos = diameter * cos(angle);// * YX_SCALE;
     plotter.x_axis.setPosition(x_pos);
     Serial.print(-1 * i);
     Serial.print(",");
@@ -49,7 +49,7 @@ int i;
   for(i = diameter; i >= 1; i--){
     plotter.y_axis.stepDown();
     angle = asin((double) i / (double) diameter);
-    x_pos = -1 * diameter * cos(angle) * YX_SCALE;
+    x_pos = -1 * diameter * cos(angle);// * YX_SCALE;
     plotter.x_axis.setPosition(x_pos);
     Serial.print(-1 * i);
     Serial.print(",");
@@ -59,7 +59,7 @@ int i;
   for(i = 1; i <= diameter; i++){
     plotter.y_axis.stepDown();
     angle = asin((double) i / (double) diameter);
-    x_pos = -1 * diameter * cos(angle) * YX_SCALE;
+    x_pos = -1 * diameter * cos(angle);// * YX_SCALE;
     plotter.x_axis.setPosition(x_pos);
     Serial.print(-1 * i);
     Serial.print(",");
@@ -69,7 +69,7 @@ int i;
   for(i = diameter; i >= 1; i--){
     plotter.y_axis.stepUp();
     angle = asin((double) i / (double) diameter);
-    x_pos = diameter * cos(angle) * YX_SCALE;
+    x_pos = diameter * cos(angle);// * YX_SCALE;
     plotter.x_axis.setPosition(x_pos);
     Serial.print(-1 * i);
     Serial.print(",");
@@ -81,16 +81,25 @@ int i;
 }
 
 void drawSquare(int size){
-  size = size / 2;
-  plotter.moveHeadUp();
-  plotter.quickAbsolute(-1 * size, -1 * size);
+  Serial.println("drawSware");
+  plotter.quickAbsolute(0.0, 0.0);
   plotter.moveHeadDown();
-  plotter.moveAbsolute(size, -1 * size);
-  plotter.moveAbsolute(size, size);
-  plotter.moveAbsolute(-1 * size, size);
-  plotter.moveAbsolute(-1 * size, -1 * size);
-  plotter.moveHeadUp();
-  plotter.quickAbsolute(0, 0);
+  plotter.moveAbsolute(100.0, 0.0);
+  plotter.moveAbsolute(100.0, 100.0);
+  plotter.moveAbsolute(0.0, 100.0);
+  plotter.moveAbsolute(0.0, 0.0);
+  plotter.moveHeadUp();  
+    
+//  size = size / 2;
+//  plotter.moveHeadUp();
+//  plotter.quickAbsolute(-1 * size, -1 * size);
+//  plotter.moveHeadDown();
+//  plotter.moveAbsolute(size, -1 * size);
+//  plotter.moveAbsolute(size, size);
+//  plotter.moveAbsolute(-1 * size, size);
+//  plotter.moveAbsolute(-1 * size, -1 * size);
+//  plotter.moveHeadUp();
+//  plotter.quickAbsolute(0, 0);
 }
 
 

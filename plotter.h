@@ -23,12 +23,13 @@ class Plotter{
 		// pixel coordinate functions
 		void moveAbsolute(int, int);
 		void quickAbsolute(int, int);
+                void moveRelative(int, int);
+                void arcAbsoluteCCW(int, int, double, double);
 		// mm coordinates functions
 		void initPosition(double, double);
 		void moveAbsolute(double, double);
-		void quickAbsolute(double, double);
-                void moveRelative(int, int);
-		void arcAbsoluteCW(double, double, double, double);
+		void quickAbsolute(double, double);   
+		void arcAbsoluteCCW(double, double, double, double);
 };
 
 #endif

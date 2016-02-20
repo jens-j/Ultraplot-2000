@@ -56,8 +56,8 @@
 #define X_SPEED_MAX   	120
 #define BTN_DEBOUNCE_P  20  // button debounce period in ms
 #define BTN_RETRIGGER_P 300 // button retrigger period in ms
-#define X_STEPSIZE      0.0353 // in mm
-#define Y_STEPSIZE      0.0212 // in mm
+#define X_STEPSIZE      0.0353 // in mm | Because the X resoluton is scaled to the Y resolution,
+#define Y_STEPSIZE      0.0212 // in mm | Always use the Y_STEPSIZE
 #define XY_SCALE        (X_STEPSIZE / Y_STEPSIZE)
 #define YX_SCALE        (Y_STEPSIZE / X_STEPSIZE)
 #define Y_STEPPER_PWM   100
