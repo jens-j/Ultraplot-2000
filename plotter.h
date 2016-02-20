@@ -24,12 +24,14 @@ class Plotter{
 		void moveAbsolute(int, int);
 		void quickAbsolute(int, int);
                 void moveRelative(int, int);
+                void arcAbsoluteCW(int, int, double, double);
                 void arcAbsoluteCCW(int, int, double, double);
 		// mm coordinates functions
 		void initPosition(double, double);
 		void moveAbsolute(double, double);
 		void quickAbsolute(double, double);   
-		void arcAbsoluteCCW(double, double, double, double);
+		void arcAbsoluteCW(double, double, double, double);
+                void arcAbsoluteCCW(double, double, double, double);
 };
 
 #endif

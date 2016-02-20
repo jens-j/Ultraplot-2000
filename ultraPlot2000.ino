@@ -250,12 +250,15 @@ void loop(){
   plotter.moveHeadDown();
   
   plotter.moveAbsolute(20.0, 20.0);
-  plotter.arcAbsoluteCCW(-20.0, 20.0, -20.0, 0.0);
-  plotter.arcAbsoluteCCW(20.0, 20.0, 20.0, 0.0);
+  plotter.arcAbsoluteCW(-20.0, 20.0, -20.0, 0.0);
+  plotter.arcAbsoluteCW(20.0, 20.0, 20.0, 0.0);
 
   plotter.moveHeadUp();
   plotter.quickAbsolute(0, 0);
   while(1){delayMicroseconds(1);}
+  
+  
+  
 //  int command;
 //
 //  command = buttons.getButtonEvent();
