@@ -9,9 +9,9 @@
 
 const int  N_MENU_ENTRIES[2] = {4, 4};
 
-const char MAIN_MENU_TEXT[4][20] = {"Calibrate", 
-                                    "Move head up", 
-                                    "Move head down", 
+const char MAIN_MENU_TEXT[4][20] = {"Toggle head",
+                                    "Calibrate",  
+                                    "GCode", 
                                     "Draw"};
 const char DRAW_MENU_TEXT[4][20] = {"Sinc", 
                                     "Circle", 
@@ -98,26 +98,26 @@ void calibrate(){
   buttons.clearEvent();
   while(buttons.getButtonEvent() != BUTTON_MID){
     lcd.setCursor(0, 3);
-    lcd.print(plotter.x_axis.getPosition());
+    lcd.print(plotter.x_axis.getRealPosition());
     lcd.print("     ");
   }
-  xbound0 = plotter.x_axis.getPosition();
+  xbound0 = plotter.x_axis.getRealPosition();
   lcd.setCursor(0, 2);
   lcd.print("set right x bound");
   buttons.clearEvent();
   while(buttons.getButtonEvent() != BUTTON_MID){
     lcd.setCursor(0, 3);
-    lcd.print(plotter.x_axis.getPosition());
+    lcd.print(plotter.x_axis.getRealPosition());
     lcd.print("     ");
   }
-  xbound1 = plotter.x_axis.getPosition();
+  xbound1 = plotter.x_axis.getRealPosition();
   if(xbound1 <= xbound0){
     panic("right <= left");
   }
   xrange = xbound1 - xbound0;
   plotter.x_axis.setBounds({0, xrange - 1});
   plotter.x_axis.initPosition(xrange - 1); 
-  plotter.x_axis.setPosition(xrange / 2);
+  plotter.x_axis.setPosition(xrange * XY_SCALE / 2);
   
   
   // Y-axis
@@ -216,6 +216,110 @@ void printMenu(){
 }
 
 
+void executeGCode(){
+  String s;
+  char *c1,*c2, *c3, *c4;
+  char cBuffer[100];
+  double x,y,z,i,j;
+  
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("[Executing GCode]");
+  
+  Serial.println("start");
+  
+  while(1){
+    Serial.println("next");
+    while(Serial.available() <= 0){}
+
+    s = Serial.readString();
+    s.toCharArray(cBuffer, 100);
+
+    if(strstr(cBuffer, "%")){
+      break;
+    }
+    
+    if(strstr(cBuffer, "G00")){     
+      if(c1 = strstr(cBuffer, "Z")){
+        z = atof(++c1);
+        if(z > 0){
+          plotter.moveHeadUp();
+        }
+        else{
+          plotter.moveHeadDown();
+        }
+        Serial.println("Z move");
+        Serial.println(z);
+      }
+      if((c1 = strstr(cBuffer, "X")) && (c2 = strstr(cBuffer, "Y"))){
+        x = atof(++c1);
+        y = atof(++c2);
+        plotter.quickAbsolute(x,y);
+        Serial.println("Quick");
+        Serial.println(x);
+        Serial.println(y);
+      }
+    }
+    else if(strstr(cBuffer, "G01")){
+      if(c1 = strstr(cBuffer, "Z")){
+        z = atof(++c1);
+        if(z > 0){
+          plotter.moveHeadUp();
+        }
+        else{
+          plotter.moveHeadDown();
+        }
+        Serial.println("Penetrate");
+        Serial.println(z);   
+      }
+      if((c1 = strstr(cBuffer, "X")) && (c2 = strstr(cBuffer, "Y"))){
+        x = atof(++c1);
+        y = atof(++c2);
+        plotter.moveAbsolute(x,y);
+        Serial.println("Linear");
+        Serial.println(x);
+        Serial.println(y);
+      }
+    }
+    else if(strstr(cBuffer, "G02")){
+      if((c1 = strstr(cBuffer, "X")) && (c2 = strstr(cBuffer, "Y")) && (c3 = strstr(cBuffer, "I")) && (c4 = strstr(cBuffer, "J"))){
+        x = atof(++c1);
+        y = atof(++c2);
+        i = atof(++c3);
+        j = atof(++c4);
+        plotter.arcAbsoluteCW(x,y,i,j);
+        Serial.println("Arc CW");
+        Serial.println(x);
+        Serial.println(y);
+        Serial.println(i);
+        Serial.println(j);
+      }
+    }
+    else if(strstr(cBuffer, "G03")){
+      if((c1 = strstr(cBuffer, "X")) && (c2 = strstr(cBuffer, "Y")) && (c3 = strstr(cBuffer, "I")) && (c4 = strstr(cBuffer, "J"))){
+        x = atof(++c1);
+        y = atof(++c2);
+        i = atof(++c3);
+        j = atof(++c4);
+        plotter.arcAbsoluteCCW(x,y,i,j);
+        Serial.println("Arc CCW");
+        Serial.println(x);
+        Serial.println(y);
+        Serial.println(i);
+        Serial.println(j);
+      }
+    }
+    else{
+      Serial.println("skip"); 
+    }
+     
+  }
+  Serial.print("end");
+  lcd.clear();
+}
+
+
+
 void setup(){
   
   pinMode(MOTOR_X0, OUTPUT);
@@ -244,72 +348,78 @@ void setup(){
 }
 
 
-void loop(){
-  
-  //drawCircle(20);
-  plotter.moveHeadDown();
-  
-  plotter.moveAbsolute(20.0, 20.0);
-  plotter.arcAbsoluteCW(-20.0, 20.0, -20.0, 0.0);
-  plotter.arcAbsoluteCW(20.0, 20.0, 20.0, 0.0);
-
-  plotter.moveHeadUp();
-  plotter.quickAbsolute(0, 0);
-  while(1){delayMicroseconds(1);}
-  
-  
-  
-//  int command;
-//
-//  command = buttons.getButtonEvent();
-//  if(command == BUTTON_DOWN){
-//    menuPosition = (menuPosition == N_MENU_ENTRIES[menuSel]-1) ? 0 : menuPosition+1;
-//  }
-//  if(command == BUTTON_UP){
-//    menuPosition = (menuPosition == 0) ? N_MENU_ENTRIES[menuSel]-1 : menuPosition-1;
-//  }
-//  if(command == BUTTON_MID){   
-//    switch(menuSel){
-//      
-//      case MENU_MAIN:
-//        switch(menuPosition){
-//          case 0:
-//            calibrate();
-//            break;
-//          case 1:
-//            plotter.moveHeadUp();
-//            break;
-//          case 2:
-//            plotter.moveHeadDown();
-//            break;
-//          case 3:
-//            menuSel = MENU_DRAW;
-//            menuPosition = 0;
-//            lcd.clear();
-//        }
-//        break;
-//        
-//        
-//      case MENU_DRAW:
-//        switch(menuPosition){
-//          case 0:
-//            drawSinc(2000);
-//            break;
-//          case 1:
-//            drawCircle(5000);
-//            break;
-//          case 2:
-//            drawSquare(5000);
-//            break;
-//          case 3:
-//            menuSel = MENU_MAIN;
-//            menuPosition = 0;
-//            lcd.clear();
-//        }
-//        break;
-//    }
-//  }
+void loop(){  
+//  plotter.moveHeadDown();
 //  
-//  printMenu();
+//  plotter.moveAbsolute(20.0, 20.0);
+//  plotter.arcAbsoluteCW(-20.0, 20.0, -20.0, 0.0);
+//  plotter.arcAbsoluteCW(20.0, 20.0, 20.0, 0.0);
+//
+//  plotter.moveHeadUp();
+//  plotter.quickAbsolute(0, 0);
+//  while(1){delayMicroseconds(1);}
+  
+//  plotter.quickAbsolute(72.391920, 91.177333);
+//  plotter.arcAbsoluteCW(72.391958, 91.172906, -0.257319, -0.004427);
+//  plotter.arcAbsoluteCW(72.741081, 90.243002, -3.387584, -1.802323);
+//  while(1){delayMicroseconds(1);}
+  
+  int command;
+
+  command = buttons.getButtonEvent();
+  if(command == BUTTON_DOWN){
+    menuPosition = (menuPosition == N_MENU_ENTRIES[menuSel]-1) ? 0 : menuPosition+1;
+  }
+  if(command == BUTTON_UP){
+    menuPosition = (menuPosition == 0) ? N_MENU_ENTRIES[menuSel]-1 : menuPosition-1;
+  }
+  if(command == BUTTON_MID){   
+    switch(menuSel){
+      
+      case MENU_MAIN:
+        switch(menuPosition){
+          case 0:
+            if(plotter.z_axis.getPosition() == UP){
+              plotter.moveHeadDown();
+            }
+            else{
+              plotter.moveHeadUp();
+            }
+            break;
+          case 1:
+            calibrate();
+            break;
+          case 2:
+            executeGCode();
+            break;
+          case 3:
+            menuSel = MENU_DRAW;
+            menuPosition = 0;
+            lcd.clear();
+        }
+        break;
+        
+        
+      case MENU_DRAW:
+        switch(menuPosition){
+          case 0:
+            drawSinc(2000);
+            break;
+          case 1:
+            drawCircle(5000);
+            break;
+          case 2:
+            drawSquare(50.0);
+            break;
+          case 3:
+            menuSel = MENU_MAIN;
+            menuPosition = 0;
+            lcd.clear();
+        }
+        break;
+    }
+  }
+  
+  printMenu();
 
 }

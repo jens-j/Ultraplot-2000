@@ -84,12 +84,21 @@ void X_axis::stepRight(){
 }
 
 int X_axis::getPosition(){
+  //char cBuffer[100];
   // wait for any moves to complete
   while(direction != IDLE){
     delayMicroseconds(1);
   }
+  
+  //sprintf(cBuffer, "get x (%d)", vPosition);
+  //Serial.println(cBuffer);
+  
   // convert physical to virtual coordinates
   return vPosition;
+}
+
+int X_axis::getRealPosition(){
+  return rPosition;
 }
 
 void X_axis::setPosition(int setp){
@@ -146,7 +155,7 @@ Y_axis::Y_axis() :
 stepper(MOTOR_Y0, MOTOR_Y1, MOTOR_Y2, MOTOR_Y3, Y_STEPPER_PWM)
 {
   position = 0;
-  bounds = {-6000,6000};
+  bounds = {-10000,10000};
   cooldownTime = micros();
 }
 

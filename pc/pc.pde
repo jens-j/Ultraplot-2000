@@ -12,36 +12,40 @@ void setup(){
   myPort = new Serial(this, portName, 115200); 
   
   reader = createReader("usb.ngc");   
-   
+  
+  try {
+    do{line = reader.readLine();}
+    while(line.length() == 0 || line.charAt(0) != 'G' || line.charAt(1) != '0');
+  } catch (IOException e) {
+    println("Error");
+    e.printStackTrace();
+    line = null;
+  }
+  println(line);
+  myPort.write(line);
 }
 
 
 void draw()
 {
-  int i;
-  String comp;
+
   
   if ( myPort.available() > 0) {  // If data is available,
     //println(myPort.read());
     s = myPort.readStringUntil('\n');    
-    
+    println(s);
     if(s.equals("next\r\n")) {
       try {
         do{line = reader.readLine();}
-        while(line.length() == 0);
+        while(line.length() == 0 || line.charAt(0) != 'G');
       } catch (IOException e) {
         println("Error");
         e.printStackTrace();
         line = null;
       }
       println(line);
-      //if (line == null) {
-        // Stop reading because of an error or file is empty
-        //println("File end or error");
-        //noLoop();
-      //} else {
-        myPort.write(line);
-      //}
+      myPort.write(line);
+
     }
     else{
      println(s); 

@@ -14,7 +14,7 @@ void drawSinc(int size){
   plotter.moveHeadDown();
   
   for(i = -size; i < size; i++){
-    plotter.x_axis.stepRight();
+    plotter.x_axis.setPosition(i);
     if(i != 0){
       y = ((size / 2) * sin((2 * 3.141 * i) / ((double) size / 10))) / (i / ((double) size / 10));
     }
@@ -80,26 +80,15 @@ int i;
   plotter.quickAbsolute(0, 0);
 }
 
-void drawSquare(int size){
+void drawSquare(double size){
   Serial.println("drawSware");
   plotter.quickAbsolute(0.0, 0.0);
   plotter.moveHeadDown();
-  plotter.moveAbsolute(100.0, 0.0);
-  plotter.moveAbsolute(100.0, 100.0);
-  plotter.moveAbsolute(0.0, 100.0);
+  plotter.moveAbsolute(size, 0.0);
+  plotter.moveAbsolute(size, size);
+  plotter.moveAbsolute(0.0, size);
   plotter.moveAbsolute(0.0, 0.0);
   plotter.moveHeadUp();  
-    
-//  size = size / 2;
-//  plotter.moveHeadUp();
-//  plotter.quickAbsolute(-1 * size, -1 * size);
-//  plotter.moveHeadDown();
-//  plotter.moveAbsolute(size, -1 * size);
-//  plotter.moveAbsolute(size, size);
-//  plotter.moveAbsolute(-1 * size, size);
-//  plotter.moveAbsolute(-1 * size, -1 * size);
-//  plotter.moveHeadUp();
-//  plotter.quickAbsolute(0, 0);
 }
 
 

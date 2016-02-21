@@ -4,6 +4,6 @@
 
 void drawSinc(int);
 void drawCircle(int);
-void drawSquare(int);
+void drawSquare(double);
 
 #endif;
