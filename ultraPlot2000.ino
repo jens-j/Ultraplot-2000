@@ -129,10 +129,10 @@ void calibrate(){
     if(buttons.isPressed() == BUTTON_LEFT){
       plotter.y_axis.stepDown();  
     }
-    if(buttons.isPressed() == BUTTON_RIGHT){
+    else if(buttons.isPressed() == BUTTON_RIGHT){
       plotter.y_axis.stepUp();  
     }
-    if(millis() - refresh > 100){
+    if(millis() - refresh > 200){
       lcd.setCursor(0, 3);
       lcd.print("<- ");
       lcd.print(plotter.y_axis.getPosition());
@@ -222,43 +222,35 @@ void executeGCode(){
   char cBuffer[100];
   char lcdBuffer[20];
   double x,y,z,i,j;
+  int k;
   int count = 1;
   unsigned long startTime = millis(); 
-
- int k = 0;
- String test[16]     = {
-                       "G00 Z5.000000",
-                       "G00 X74.339119 Y76.720586",
-                       "G01 Z-0.125000 F100.0(Penetrate)",
-                       "G02 X74.926741 Y77.168285 Z-0.125000 I1.475294 J-1.326893 F400.000000",
-                       "G02 X75.396716 Y77.279273 Z-0.125000 I0.469974 J-0.939550",
-                       "G02 X76.122430 Y77.023111 Z-0.125000 I0.000000 J-1.156069",
-                       "G02 X76.806080 Y76.189488 Z-0.125000 I-1.660110 J-2.058587",
-                       "G02 X77.321621 Y74.039577 Z-0.125000 I-4.478931 J-2.210800",
-                       "G02 X76.824481 Y71.885526 Z-0.125000 I-4.668588 J-0.056916",
-                       "G02 X76.205120 Y71.066083 Z-0.125000 I-2.463561 J1.218250",
-                       "G02 X75.527774 Y70.761254 Z-0.125000 I-0.810076 J0.895069",
-                       "G02 X75.010691 Y70.833776 Z-0.125000 I-0.122614 J1.005436",
-                       "G02 X74.357520 Y71.290054 Z-0.125000 I0.745236 J1.762472"
-                       "G02 X73.455944 Y73.493448 Z-0.125000 I2.835840 J2.446506",
-                       "G02 X73.826191 Y75.842321 Z-0.125000 I5.405242 J0.351602",
-                       "G00 Z5.000000"
-                      };
-  
+  int ts, tl, t0, t1, t2, t3, t4, t5;
+ 
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("[Executing GCode]");
   
   Serial.println("start");
   
-  while(k < 16){
+  while(1){
+    tl = ts - millis();
+    ts = millis();
     Serial.println("next");
-    sprintf(lcdBuffer, "move [%d]", count);
-    Serial.print(lcdBuffer);
+    t1 = millis() - ts;
+    t0 = millis();
     
-    //while(Serial.available() <= 0){}
-    //s = Serial.readString(); 
-    s = test[k++];
+    
+    
+    t2 = millis() - t0;
+    t0 = millis();
+    
+    while(Serial.available() < 0){
+      delayMicroseconds(1); 
+    }
+    s = Serial.readString(); 
+    k = 0;
+ 
     s.toCharArray(cBuffer, 100);
 
     if(strstr(cBuffer, "%")){
@@ -329,6 +321,12 @@ void executeGCode(){
       lcd.print("invalid command"); 
     }
     
+    t4 = millis() - t0;
+    t0 = millis();
+    
+    sprintf(cBuffer, "%d, %d %d, %d, %d, %d", tl, t1, t2, t3, t4, t5);
+    Serial.println(cBuffer);
+    
     lcd.setCursor(0,2);
     sprintf(lcdBuffer, "%d ops", count++);
     lcd.print(lcdBuffer);
@@ -336,6 +334,9 @@ void executeGCode(){
     lcd.setCursor(0,3);
     sprintf(lcdBuffer, "time %ds", (millis() - startTime) / 1000);
     lcd.print(lcdBuffer);
+    
+    t5 = millis() - t0;
+    t0 = millis();
      
   }
   Serial.print("end");
@@ -367,32 +368,14 @@ void setup(){
   Timer1.attachInterrupt(timerIsrDispatcher);
 
   Serial.begin(115200);
+  Serial.setTimeout(50);
   lcd.begin(20, 4);
   printMenu();
 }
 
 
 void loop(){  
-//  plotter.moveHeadDown();
-//  
-//  plotter.moveAbsolute(20.0, 20.0);
-//  plotter.arcAbsoluteCW(-20.0, 20.0, -20.0, 0.0);
-//  plotter.arcAbsoluteCW(20.0, 20.0, 20.0, 0.0);
-//
-//  plotter.moveHeadUp();
-//  plotter.quickAbsolute(0, 0);
-//  while(1){delayMicroseconds(1);}
 
-  // plotter.quickAbsolute(67.156654, 84.730738);
-  // plotter.arcAbsoluteCW(68.343841, 83.533541, -0.148248, -1.334238);
-  // plotter.arcAbsoluteCW(68.165968, 81.900515, -3.905619, -0.400791);
-  // while(1){delayMicroseconds(1);}
-  
- // plotter.quickAbsolute(72.391920, 91.177333);
- // plotter.arcAbsoluteCW(72.391958, 91.172906, -0.257319, -0.004427);
- // plotter.arcAbsoluteCW(72.741081, 90.243002, -3.387584, -1.802323);
- // while(1){delayMicroseconds(1);}
-  
   int command;
 
   command = buttons.getButtonEvent();

@@ -86,7 +86,7 @@ void Plotter::arcAbsolute(int x3, int y3, int i, int j, int direction){
 
   radius = sqrt(pow((x3 - x0), 2) + pow((y3 - y0), 2));
 
-  Serial.println("\nStart\n");
+  //Serial.println("\nStart\n");
 
   while(!(abs(x2-x3) < 2 && y2 == y3)){
         
@@ -146,11 +146,11 @@ void Plotter::arcAbsolute(int x3, int y3, int i, int j, int direction){
       x_axis.setPosition(x2);
     }
     
-    sprintf(cBuffer, "(%d, %d), (%d, %d) %d ", x2, y2, x3, y3, dy);
-    Serial.print(cBuffer);
-    Serial.print(radius, 3);
-    Serial.print(", ");
-    Serial.println(phi, 3);
+//    sprintf(cBuffer, "(%d, %d), (%d, %d) %d ", x2, y2, x3, y3, dy);
+//    Serial.print(cBuffer);
+//    Serial.print(radius, 3);
+//    Serial.print(", ");
+//    Serial.println(phi, 3);
   }
 }
 

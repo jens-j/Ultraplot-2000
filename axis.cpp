@@ -167,7 +167,9 @@ void Y_axis::stepDown(){
   if(digitalRead(BUTTON_Y0) == LOW){
     panic("y < HW bound");
   }
-  while((micros() - cooldownTime) < Y_COOLDOWN){}
+  while((micros() - cooldownTime) < Y_COOLDOWN){
+    delayMicroseconds(1);
+  }
   stepper.stepRight();
   cooldownTime = micros();
 }
@@ -179,7 +181,9 @@ void Y_axis::stepUp(){
   if(digitalRead(BUTTON_Y1) == LOW){
       panic("y > HW bound");
   }
-  while((micros() - cooldownTime) < Y_COOLDOWN){}
+  while((micros() - cooldownTime) < Y_COOLDOWN){
+    delayMicroseconds(1);
+  }
   stepper.stepLeft();
   cooldownTime = micros(); 
 }
