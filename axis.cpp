@@ -164,7 +164,7 @@ void Y_axis::stepDown(){
   if(--position < bounds.b0){
     panic("y < SW bound"); 
   }
-  if(digitalRead(BUTTON_Y1) == LOW){
+  if(digitalRead(BUTTON_Y0) == LOW){
     panic("y < HW bound");
   }
   while((micros() - cooldownTime) < Y_COOLDOWN){}
@@ -176,7 +176,7 @@ void Y_axis::stepUp(){
   if(++position > bounds.b1){
     panic("y > SW bound"); 
   }
-  if(digitalRead(BUTTON_Y0) == LOW){
+  if(digitalRead(BUTTON_Y1) == LOW){
       panic("y > HW bound");
   }
   while((micros() - cooldownTime) < Y_COOLDOWN){}

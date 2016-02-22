@@ -31,6 +31,7 @@ public:
   void stepLeft();
   void stepRight();
   int getPosition();
+  int getRealPosition();
   void setPosition(int);
   void quickSetPosition(int);
   void setBounds(bounds_t);

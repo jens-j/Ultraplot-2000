@@ -220,7 +220,30 @@ void executeGCode(){
   String s;
   char *c1,*c2, *c3, *c4;
   char cBuffer[100];
+  char lcdBuffer[20];
   double x,y,z,i,j;
+  int count = 1;
+  unsigned long startTime = millis(); 
+
+ int k = 0;
+ String test[16]     = {
+                       "G00 Z5.000000",
+                       "G00 X74.339119 Y76.720586",
+                       "G01 Z-0.125000 F100.0(Penetrate)",
+                       "G02 X74.926741 Y77.168285 Z-0.125000 I1.475294 J-1.326893 F400.000000",
+                       "G02 X75.396716 Y77.279273 Z-0.125000 I0.469974 J-0.939550",
+                       "G02 X76.122430 Y77.023111 Z-0.125000 I0.000000 J-1.156069",
+                       "G02 X76.806080 Y76.189488 Z-0.125000 I-1.660110 J-2.058587",
+                       "G02 X77.321621 Y74.039577 Z-0.125000 I-4.478931 J-2.210800",
+                       "G02 X76.824481 Y71.885526 Z-0.125000 I-4.668588 J-0.056916",
+                       "G02 X76.205120 Y71.066083 Z-0.125000 I-2.463561 J1.218250",
+                       "G02 X75.527774 Y70.761254 Z-0.125000 I-0.810076 J0.895069",
+                       "G02 X75.010691 Y70.833776 Z-0.125000 I-0.122614 J1.005436",
+                       "G02 X74.357520 Y71.290054 Z-0.125000 I0.745236 J1.762472"
+                       "G02 X73.455944 Y73.493448 Z-0.125000 I2.835840 J2.446506",
+                       "G02 X73.826191 Y75.842321 Z-0.125000 I5.405242 J0.351602",
+                       "G00 Z5.000000"
+                      };
   
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -228,57 +251,58 @@ void executeGCode(){
   
   Serial.println("start");
   
-  while(1){
+  while(k < 16){
     Serial.println("next");
-    while(Serial.available() <= 0){}
-
-    s = Serial.readString();
+    sprintf(lcdBuffer, "move [%d]", count);
+    Serial.print(lcdBuffer);
+    
+    //while(Serial.available() <= 0){}
+    //s = Serial.readString(); 
+    s = test[k++];
     s.toCharArray(cBuffer, 100);
 
     if(strstr(cBuffer, "%")){
       break;
     }
+
+    lcd.setCursor(0, 1);
     
     if(strstr(cBuffer, "G00")){     
-      if(c1 = strstr(cBuffer, "Z")){
-        z = atof(++c1);
-        if(z > 0){
-          plotter.moveHeadUp();
-        }
-        else{
-          plotter.moveHeadDown();
-        }
-        Serial.println("Z move");
-        Serial.println(z);
-      }
       if((c1 = strstr(cBuffer, "X")) && (c2 = strstr(cBuffer, "Y"))){
         x = atof(++c1);
         y = atof(++c2);
+        lcd.print("move quick      ");
         plotter.quickAbsolute(x,y);
-        Serial.println("Quick");
-        Serial.println(x);
-        Serial.println(y);
+      }
+      else if(c1 = strstr(cBuffer, "Z")){
+        z = atof(++c1);
+        if(z > 0){
+          lcd.print("move head up  ");
+          plotter.moveHeadUp();
+        }
+        else{
+          lcd.print("move head down");
+          plotter.moveHeadDown();
+        }
       }
     }
     else if(strstr(cBuffer, "G01")){
-      if(c1 = strstr(cBuffer, "Z")){
-        z = atof(++c1);
-        if(z > 0){
-          plotter.moveHeadUp();
-        }
-        else{
-          plotter.moveHeadDown();
-        }
-        Serial.println("Penetrate");
-        Serial.println(z);   
-      }
       if((c1 = strstr(cBuffer, "X")) && (c2 = strstr(cBuffer, "Y"))){
         x = atof(++c1);
         y = atof(++c2);
+        lcd.print("linear move     ");
         plotter.moveAbsolute(x,y);
-        Serial.println("Linear");
-        Serial.println(x);
-        Serial.println(y);
+      }
+      else if(c1 = strstr(cBuffer, "Z")){
+        z = atof(++c1);
+        if(z > 0){
+          lcd.print("move head up  ");
+          plotter.moveHeadUp();
+        }
+        else{
+          lcd.print("move head down");
+          plotter.moveHeadDown();
+        }
       }
     }
     else if(strstr(cBuffer, "G02")){
@@ -287,12 +311,8 @@ void executeGCode(){
         y = atof(++c2);
         i = atof(++c3);
         j = atof(++c4);
-        plotter.arcAbsoluteCW(x,y,i,j);
-        Serial.println("Arc CW");
-        Serial.println(x);
-        Serial.println(y);
-        Serial.println(i);
-        Serial.println(j);
+        lcd.print("arc CW         ");
+        plotter.arcAbsolute(x,y,i,j, CW);
       }
     }
     else if(strstr(cBuffer, "G03")){
@@ -301,17 +321,21 @@ void executeGCode(){
         y = atof(++c2);
         i = atof(++c3);
         j = atof(++c4);
-        plotter.arcAbsoluteCCW(x,y,i,j);
-        Serial.println("Arc CCW");
-        Serial.println(x);
-        Serial.println(y);
-        Serial.println(i);
-        Serial.println(j);
+        lcd.print("arc CCW        ");
+        plotter.arcAbsolute(x,y,i,j, CCW);
       }
     }
     else{
-      Serial.println("skip"); 
+      lcd.print("invalid command"); 
     }
+    
+    lcd.setCursor(0,2);
+    sprintf(lcdBuffer, "%d ops", count++);
+    lcd.print(lcdBuffer);
+    
+    lcd.setCursor(0,3);
+    sprintf(lcdBuffer, "time %ds", (millis() - startTime) / 1000);
+    lcd.print(lcdBuffer);
      
   }
   Serial.print("end");
@@ -358,11 +382,16 @@ void loop(){
 //  plotter.moveHeadUp();
 //  plotter.quickAbsolute(0, 0);
 //  while(1){delayMicroseconds(1);}
+
+  // plotter.quickAbsolute(67.156654, 84.730738);
+  // plotter.arcAbsoluteCW(68.343841, 83.533541, -0.148248, -1.334238);
+  // plotter.arcAbsoluteCW(68.165968, 81.900515, -3.905619, -0.400791);
+  // while(1){delayMicroseconds(1);}
   
-//  plotter.quickAbsolute(72.391920, 91.177333);
-//  plotter.arcAbsoluteCW(72.391958, 91.172906, -0.257319, -0.004427);
-//  plotter.arcAbsoluteCW(72.741081, 90.243002, -3.387584, -1.802323);
-//  while(1){delayMicroseconds(1);}
+ // plotter.quickAbsolute(72.391920, 91.177333);
+ // plotter.arcAbsoluteCW(72.391958, 91.172906, -0.257319, -0.004427);
+ // plotter.arcAbsoluteCW(72.741081, 90.243002, -3.387584, -1.802323);
+ // while(1){delayMicroseconds(1);}
   
   int command;
 

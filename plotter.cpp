@@ -68,229 +68,99 @@ void Plotter::quickAbsolute(double setX, double setY){
   quickAbsolute((int) (setX / Y_STEPSIZE), (int) (setY / Y_STEPSIZE));
 }
 
-void Plotter::arcAbsoluteCW(int setX, int setY, double i, double j){
+void Plotter::arcAbsolute(int x3, int y3, int i, int j, int direction){
   char cBuffer[100];
-  double angle;
-  int corner;
-  int setCorner;
-  int step;
-  int x0 = x_axis.getPosition();
-  int y0 = y_axis.getPosition();
-  int dx = setX - (x0 + i);
-  int dy = setY - (y0 + j);
-  double radius = sqrt(pow(i,2) + pow(j,2));
-  position_t origin = {(double) x0 + i, (double) y0 + j};
-  
-  //sprintf(cBuffer, "origin = (%d,%d), radius = ", (int) origin.x, (int) origin.y);
-  //Serial.print(cBuffer);
-  //Serial.println(radius, 3);
-  
-  if(i <= 0.0 && j < 0.0)
-    corner = 0;
-  else if(i > 0.0 && j <= 0.0)
-    corner = 1;
-  else if(i >= 0.0 && j > 0.0)
-    corner = 2;
-  else 
-    corner = 3;
+  int x0, y0; // origin
+  int x1, y1; // start
+  int x2, y2; // position
+  int dx, dy; // position relative to the origin
+  double phi; // angle of position
+  double radius;
+  double x2_d;
+
+  x1 = x2 = x_axis.getPosition();
+  y1 = y2 = y_axis.getPosition();
+
+  x0 = x1 + i;
+  y0 = y1 + j;
+
+  radius = sqrt(pow((x3 - x0), 2) + pow((y3 - y0), 2));
+
+  Serial.println("\nStart\n");
+
+  while(!(abs(x2-x3) < 2 && y2 == y3)){
+        
+    dx = x2 - x0;
+    dy = y2 - y0;
     
-  if(dx >= 0.0 && dy > 0.0)
-    setCorner = 0;
-  else if(dx < 0.0 && dy >= 0.0)
-    setCorner = 1;
-  else if(dx <= 0.0 && dy < 0.0)
-    setCorner = 2;
-  else 
-    setCorner = 3;
-      
-  step = -j;
-  
-  
-  while(x_axis.getPosition() != setX || y_axis.getPosition() != setY){    
-    switch(corner){
-      case 0:
-        y_axis.stepDown();
-        if(--step == dy && setCorner == 0){ 
-          x_axis.setPosition(setX);
-        }
-        else if(step == 0){
-          x_axis.setPosition(origin.x + radius);
-          corner = 3;
-        }else{
-          angle = asin((double) step / radius);
-          x_axis.setPosition(origin.x + (radius * cos(angle)));          
-        }
-        break;
-      case 1:
-        y_axis.stepUp();
-        if(step++ == dy && setCorner == 1){ 
-          x_axis.setPosition(setX);
-        }
-        else if(step == (int) radius){
-          x_axis.setPosition(origin.x);
-          corner = 0;
-        }else{
-          angle = asin((double) step / radius);
-          x_axis.setPosition(origin.x - (radius * cos(angle)));          
-        }
-        break;
-      case 2:
-        y_axis.stepUp();
-        if(step++ == dy && setCorner == 2){ 
-          x_axis.setPosition(setX);
-        }
-        else if(step == 0){
-          x_axis.setPosition(origin.x - radius);
-          corner = 1;
-        }else{
-          angle = asin((double) step / radius);
-          x_axis.setPosition(origin.x - (radius * cos(angle)));
-        }
-        break;      
-      default:
-        y_axis.stepDown();
-        if( step-- == dy &setCorner == 3){ 
-          x_axis.setPosition(setX);
-          Serial.println("now");
-        }
-        else if(step == (int) -radius){
-          x_axis.setPosition(origin.x);
-          corner = 2;
-        }else{
-          angle = asin((double) step / radius);
-          x_axis.setPosition(origin.x + (radius * cos(angle)));
-        }
+    if(direction == CCW && (dx > 0 || (dx == 0 && dy < 0))){
+      y2++;
+      y_axis.stepUp();
+      dy = y2 - y0;
+      if(dy > radius)
+        x2 = x0;
+      else{
+        phi = asin(dy / radius);
+        x2 = x0 + (int) (radius * cos(phi));
+      }
+      x2_d = x0 + (radius * cos(phi));   
+      x_axis.setPosition(x2);
+    } 
+    else if(direction == CCW && (dx < 0 || (dx == 0 && dy > 0))){
+      y2--;
+      y_axis.stepDown();
+      dy = y2 - y0;
+      if(dy < -radius)
+        x2 = x0;
+      else{
+        phi = asin(dy / radius);
+        x2 = x0 - (int) (radius * cos(phi));
+      }
+      x2_d = x0 - (radius * cos(phi));
+      x_axis.setPosition(x2);
     }
-    //sprintf(cBuffer, "%d, %d, %d, %d, (%d,%d) (%d,%d) ", corner, setCorner, step, dy, x_axis.getPosition(), y_axis.getPosition(), setX, setY);
-    //Serial.print(cBuffer);
-    //Serial.println(angle, 5);
-    //Serial.println(radius, 5);
+    else if(direction == CW && (dx > 0 || (dx == 0 && dy > 0))){
+      y2--;
+      y_axis.stepDown();
+      dy = y2 - y0;
+      if(dy > radius)
+        x2 = x0;
+      else{
+        phi = asin(dy / radius);
+        x2 = x0 + (int) (radius * cos(phi));
+      }
+      x2_d = x0 + (radius * cos(phi));
+      x_axis.setPosition(x2);
+    }
+    else if(direction == CW && (dx < 0 || (dx == 0 && dy < 0))){
+      y2++;
+      y_axis.stepUp();
+      dy = y2 - y0;
+      if(dy < -radius)
+        x2 = x0;
+      else{
+        phi = asin(dy / radius);
+        x2 = x0 - (int) (radius * cos(phi));
+      }
+      x2_d = x0 - (radius * cos(phi));
+      x_axis.setPosition(x2);
+    }
+    
+    sprintf(cBuffer, "(%d, %d), (%d, %d) %d ", x2, y2, x3, y3, dy);
+    Serial.print(cBuffer);
+    Serial.print(radius, 3);
+    Serial.print(", ");
+    Serial.println(phi, 3);
   }
 }
 
-void Plotter::arcAbsoluteCCW(int setX, int setY, double i, double j){
-  char cBuffer[100];
-  double angle;
-  int corner, setCorner;
-  int step;
-  int x0 = x_axis.getPosition();
-  int y0 = y_axis.getPosition();
-  int dx = setX - (x0 + i);
-  int dy = setY - (y0 + j);
-  double radius = sqrt(pow(i,2) + pow(j,2));
-  position_t origin = {(double) x0 + i, (double) y0 + j};
-  
-  //sprintf(cBuffer, "origin = (%d,%d), radius = ", (int) origin.x, (int) origin.y);
-  //Serial.print(cBuffer);
-  //Serial.println(radius, 3);
-  
-  if(i < 0.0 && j <= 0.0)
-    corner = 0;
-  else if(i >= 0.0 && j < 0.0)
-    corner = 1;
-  else if(i > 0.0 && j >= 0.0)
-    corner = 2;
-  else 
-    corner = 3;
-    
-  if(dx >= 0.0 && dy > 0.0)
-    setCorner = 0;
-  else if(dx < 0.0 && dy >= 0.0)
-    setCorner = 1;
-  else if(dx <= 0.0 && dy < 0.0)
-    setCorner = 2;
-  else 
-    setCorner = 3;
-      
-  step = -j;
-  
-  
-  while(x_axis.getPosition() != setX || y_axis.getPosition() != setY){    
-    switch(corner){
-      case 0:
-        step++;
-        y_axis.stepUp();
-        if(step++ == dy && setCorner == 0){ 
-          x_axis.setPosition(setX);
-        }
-        else if(step == (int) radius){
-          x_axis.setPosition(origin.x);
-          corner = 1;
-        }else{
-          angle = asin(step / radius);
-          x_axis.setPosition(origin.x + (radius * cos(angle)));          
-        }
-        break;
-      case 1:
-        step--;
-        y_axis.stepDown();
-        if(step-- == dy && setCorner == 1){ 
-          x_axis.setPosition(setX);
-        }
-        else if(step == 0){
-          x_axis.setPosition(origin.x - radius);
-          corner = 2;
-        }else{
-          angle = asin(step / radius);
-          x_axis.setPosition(origin.x - (radius * cos(angle)));          
-        }
-        break;
-      case 2:
-        step--;
-        y_axis.stepDown();
-        if(step-- == dy && setCorner == 2){ 
-          x_axis.setPosition(setX);
-        }
-        else if(step == (int) -radius){
-          x_axis.setPosition(origin.x);
-          corner = 3;
-        }else{
-          angle = asin(step / radius);
-          x_axis.setPosition(origin.x - (radius * cos(angle)));
-        }
-        break;      
-      default:
-        step++;
-        y_axis.stepUp();
-        if(step++ == dy && setCorner == 3){ 
-          x_axis.setPosition(setX);
-        }
-        else if(step == 0){
-          x_axis.setPosition(origin.x + radius);
-          corner = 0;
-        }else{
-          angle = asin(step / radius);
-          x_axis.setPosition(origin.x + (radius * cos(angle)));
-        }
-    }
 
-//    Serial.print("angle = asin((double)step/radius) => ");
-//    Serial.print(angle,3);
-//    Serial.print(" = asin(");
-//    Serial.print((double) step, 3);
-//    Serial.print("/");
-//    Serial.print(radius,3);
-//    Serial.println(")");
-    
-//    sprintf(cBuffer, "%d %d (%d,%d) (%d,%d) ", corner, step, x_axis.getPosition(), y_axis.getPosition(), setX, setY);
-//    Serial.print(cBuffer);
-//    Serial.println(angle, 5);
-//    Serial.println(radius, 5);
-    
-  }
-}
-
-void Plotter::arcAbsoluteCW(double setX, double setY, double i, double j){
+void Plotter::arcAbsolute(double setX, double setY, double i, double j, int direction){
   
-  arcAbsoluteCW((int) (setX / Y_STEPSIZE), (int) (setY / Y_STEPSIZE), i / Y_STEPSIZE, j / Y_STEPSIZE);
+  arcAbsolute((int) (setX / Y_STEPSIZE), (int) (setY / Y_STEPSIZE), (int) (i / Y_STEPSIZE), (int) (j / Y_STEPSIZE), direction);
   
 }
 
-void Plotter::arcAbsoluteCCW(double setX, double setY, double i, double j){
-  
-  arcAbsoluteCCW((int) (setX / Y_STEPSIZE), (int) (setY / Y_STEPSIZE), i / Y_STEPSIZE, j / Y_STEPSIZE);
-  
-}
 
 void Plotter::moveHeadUp(){
   z_axis.setPosition(UP);

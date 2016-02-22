@@ -8,7 +8,7 @@ String line;
 
 void setup(){
   printArray(Serial.list());
-  String portName = "/dev/ttyUSB7"; // Serial.list()[7]; //change the 0 to a 1 or 2 etc. to match your port
+  String portName = "/dev/ttyUSB14"; // Serial.list()[7]; //change the 0 to a 1 or 2 etc. to match your port
   myPort = new Serial(this, portName, 115200); 
   
   reader = createReader("usb.ngc");   
@@ -34,7 +34,9 @@ void draw()
     //println(myPort.read());
     s = myPort.readStringUntil('\n');    
     println(s);
-    if(s.equals("next\r\n")) {
+   
+    if(s.equals("next\r\n")){
+   
       try {
         do{line = reader.readLine();}
         while(line.length() == 0 || line.charAt(0) != 'G');
@@ -45,11 +47,10 @@ void draw()
       }
       println(line);
       myPort.write(line);
-
+    
     }
     else{
      println(s); 
-    }
-  } 
-  
+    }  
+  }
 }

@@ -4,6 +4,11 @@
 #include "ultraPlot2000.h"
 #include "axis.h"
 
+enum {CW, CCW};
+
+enum {POSITIVE, ZERO, NEGATIVE};
+#define SIGN(X) ((X > 0) ? POSITIVE : ((X == 0) ? ZERO : NEGATIVE)
+
 typedef struct position_s{
   double x;
   double y;
@@ -23,15 +28,15 @@ class Plotter{
 		// pixel coordinate functions
 		void moveAbsolute(int, int);
 		void quickAbsolute(int, int);
-                void moveRelative(int, int);
-                void arcAbsoluteCW(int, int, double, double);
-                void arcAbsoluteCCW(int, int, double, double);
+		void moveRelative(int, int);
+		void arcAbsoluteCW(int, int, double, double);
+		void arcAbsoluteCCW(int, int, double, double);
+		void arcAbsolute(int, int, int, int, int);
 		// mm coordinates functions
 		void initPosition(double, double);
 		void moveAbsolute(double, double);
 		void quickAbsolute(double, double);   
-		void arcAbsoluteCW(double, double, double, double);
-                void arcAbsoluteCCW(double, double, double, double);
+		void arcAbsolute(double, double, double, double, int);
 };
 
 #endif
