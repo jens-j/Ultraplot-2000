@@ -228,24 +228,42 @@ z_position_t Z_axis::getPosition(){
   return position;
 }
 
-void Z_axis::setPosition(z_position_t setPoint){
-  int i, step;
+void Z_axis::moveRelative(int d){
+ char cBuffer[100];
+ sprintf(cBuffer, "move head %d", d);
+ Serial.println(cBuffer); 
+ int step = d * 8;
+ while(step != 0){
+   if(step > 0){
+     stepper.stepRight();
+     step--;
+   }
+   else{
+     stepper.stepLeft();
+     step++;
+   }
+   
+   delayMicroseconds(Z_COOLDOWN);
+ } 
+}
 
-  if(position == setPoint || position == MOVING)
+void Z_axis::setPosition(z_position_t setPoint){
+  int i;
+  char cBuffer[100];
+  
+  if(position == setPoint)
     return;
 
-  position = MOVING;
-
-  for(i = 0; i < 40 * N_PHASE ; i++){
-    if(setPoint == UP){
-      stepper.stepLeft();
-      delayMicroseconds(800);
-    }
-    else{
-      stepper.stepRight();
-      delayMicroseconds(800);		
-    }
+  // force the head in a up position after startup
+  if(position == UNKNOWN){
+    moveRelative(-40);
+    position = UP;
   }
+    
+  sprintf(cBuffer, "set head from %d to %d", position, setPoint);
+  Serial.println(cBuffer); 
+
+  moveRelative(setPoint - position);
 
   position = setPoint;
 }

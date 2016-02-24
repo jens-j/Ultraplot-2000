@@ -224,7 +224,7 @@ void executeGCode(){
   double x,y,z,i,j;
   int k;
   int count = 1;
-  unsigned long startTime = millis(); 
+  unsigned long pauseTime, startTime = millis(); 
   int ts, tl, t0, t1, t2, t3, t4, t5;
  
   lcd.clear();
@@ -234,24 +234,15 @@ void executeGCode(){
   Serial.println("start");
   
   while(1){
-    tl = ts - millis();
-    ts = millis();
     Serial.println("next");
-    t1 = millis() - ts;
-    t0 = millis();
     
-    
-    
-    t2 = millis() - t0;
-    t0 = millis();
-    
-    while(Serial.available() < 0){
+    while(Serial.available() == 0){
       delayMicroseconds(1); 
     }
+    
     s = Serial.readString(); 
-    k = 0;
- 
     s.toCharArray(cBuffer, 100);
+    //Serial.print(s);
 
     if(strstr(cBuffer, "%")){
       break;
@@ -269,11 +260,13 @@ void executeGCode(){
       else if(c1 = strstr(cBuffer, "Z")){
         z = atof(++c1);
         if(z > 0){
-          lcd.print("move head up  ");
-          plotter.moveHeadUp();
+          lcd.print("move head mid  ");
+          Serial.println("move head mid");
+          plotter.moveHeadMid();
         }
         else{
           lcd.print("move head down");
+          Serial.println("move head down");
           plotter.moveHeadDown();
         }
       }
@@ -288,11 +281,13 @@ void executeGCode(){
       else if(c1 = strstr(cBuffer, "Z")){
         z = atof(++c1);
         if(z > 0){
-          lcd.print("move head up  ");
-          plotter.moveHeadUp();
+          lcd.print("move head mid  ");
+          Serial.println("move head mid");
+          plotter.moveHeadMid();
         }
         else{
           lcd.print("move head down");
+          Serial.println("move head down");
           plotter.moveHeadDown();
         }
       }
@@ -318,14 +313,12 @@ void executeGCode(){
       }
     }
     else{
+      count--;
       lcd.print("invalid command"); 
     }
     
-    t4 = millis() - t0;
-    t0 = millis();
-    
-    sprintf(cBuffer, "%d, %d %d, %d, %d, %d", tl, t1, t2, t3, t4, t5);
-    Serial.println(cBuffer);
+    //sprintf(cBuffer, "%d, %d %d, %d, %d, %d", tl, t1, t2, t3, t4, t5);
+    //Serial.println(cBuffer);
     
     lcd.setCursor(0,2);
     sprintf(lcdBuffer, "%d ops", count++);
@@ -335,11 +328,34 @@ void executeGCode(){
     sprintf(lcdBuffer, "time %ds", (millis() - startTime) / 1000);
     lcd.print(lcdBuffer);
     
-    t5 = millis() - t0;
-    t0 = millis();
-     
+    if(buttons.getButtonEvent() != BUTTON_NONE){
+      pauseTime = millis();
+      plotter.moveHeadUp();
+      lcd.setCursor(0,1);
+      lcd.print("                   ");
+      lcd.setCursor(0,2);
+      lcd.print("paused             ");
+      lcd.setCursor(0,3);
+      lcd.print("                   ");
+      while(buttons.getButtonEvent() != BUTTON_NONE){
+        delayMicroseconds(1);
+      }
+      startTime += millis() - pauseTime;
+    }
   }
+  lcd.setCursor(0,1);
+  lcd.print("                   ");
+  lcd.setCursor(0,2);
+  lcd.print("done:              ");
+  lcd.setCursor(0,3);
+  sprintf(lcdBuffer, "%d moves, %ds      ", count, (millis() - startTime) / 1000);
+  lcd.print(lcdBuffer);
   Serial.print("end");
+  
+  while(buttons.getButtonEvent() != BUTTON_NONE){
+    delayMicroseconds(1);
+  }
+      
   lcd.clear();
 }
 
@@ -368,7 +384,7 @@ void setup(){
   Timer1.attachInterrupt(timerIsrDispatcher);
 
   Serial.begin(115200);
-  Serial.setTimeout(50);
+  Serial.setTimeout(20);
   lcd.begin(20, 4);
   printMenu();
 }
@@ -394,8 +410,10 @@ void loop(){
             if(plotter.z_axis.getPosition() == UP){
               plotter.moveHeadDown();
             }
-            else{
+            else if(plotter.z_axis.getPosition() == MID)
               plotter.moveHeadUp();
+            else{
+              plotter.moveHeadMid();
             }
             break;
           case 1:

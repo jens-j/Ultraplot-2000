@@ -6,7 +6,7 @@
 
 
 // positions of the plotter head 
-enum z_position_t  {UP, DOWN, MID, MOVING, UNKNOWN};
+enum z_position_t  {UP = 0, DOWN = 40, MID = 30, UNKNOWN};
 enum x_direction_t {LEFT, RIGHT, IDLE};
 
 typedef struct bounds_s{
@@ -63,6 +63,7 @@ public:
 class Z_axis{
   z_position_t position;
   Stepper stepper;
+  void moveRelative(int);
 public:
   Z_axis();
   z_position_t getPosition();

@@ -25,6 +25,7 @@ class Plotter{
 		Plotter();
 		void moveHeadUp();
 		void moveHeadDown();
+		void moveHeadMid();
 		// pixel coordinate functions
 		void moveAbsolute(int, int);
 		void quickAbsolute(int, int);

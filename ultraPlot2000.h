@@ -63,6 +63,7 @@
 #define Y_STEPPER_PWM   100
 #define X_COOLDOWN      2000 // in us
 #define Y_COOLDOWN      1200 // in us
+#define Z_COOLDOWN 		800  // in us
 
 /*********************************************************/
 /*	Types			    
