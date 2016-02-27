@@ -6,8 +6,8 @@
 extern Plotter plotter;
 
 void drawSinc(int size){
-  int i;
-  int y;
+  long i;
+  long y;
   
   plotter.moveHeadUp();
   plotter.quickAbsolute(-size,0);

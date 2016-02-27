@@ -7,7 +7,7 @@
 enum {CW, CCW};
 
 enum {POSITIVE, ZERO, NEGATIVE};
-#define SIGN(X) ((X > 0) ? POSITIVE : ((X == 0) ? ZERO : NEGATIVE)
+#define SIGN(X) ((X > 0) ? POSITIVE : ((X == 0) ? ZERO : NEGATIVE))
 
 typedef struct position_s{
   double x;
@@ -16,7 +16,7 @@ typedef struct position_s{
 
 class Plotter{
 	private:
-		position_t position;
+		position_t position; // in mm coordinates
 	public:
 		X_axis x_axis;
 		Y_axis y_axis;
@@ -32,8 +32,9 @@ class Plotter{
 		void moveRelative(int, int);
 		void arcAbsoluteCW(int, int, double, double);
 		void arcAbsoluteCCW(int, int, double, double);
-		void arcAbsolute(int, int, int, int, int);
+		void arcAbsolute(int, int, long, long, int);
 		// mm coordinates functions
+                position_t getPosition();
 		void initPosition(double, double);
 		void moveAbsolute(double, double);
 		void quickAbsolute(double, double);   

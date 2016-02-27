@@ -222,7 +222,6 @@ void executeGCode(){
   char cBuffer[100];
   char lcdBuffer[20];
   double x,y,z,i,j;
-  int k;
   int count = 1;
   unsigned long pauseTime, startTime = millis(); 
   int ts, tl, t0, t1, t2, t3, t4, t5;
@@ -231,26 +230,15 @@ void executeGCode(){
   lcd.setCursor(0, 0);
   lcd.print("[Executing GCode]");
 
-  char test[17][100] = { "G00 Z5.000000",
-                    "G00 X75.403024 Y96.379432",
-                    "G01 Z-0.125000 F100.0(Penetrate)",
-                    "G01 X77.791694 Y93.623274 Z-0.125000 F400.000000",
-                    "G01 X78.894158 Y90.683370 Z-0.125000",
-                    "G01 X81.834062 Y91.785834 Z-0.125000",
-                    "G01 X81.925937 Y93.163915 Z-0.125000",
-                    "G03 X82.406798 Y93.310690 Z-0.125000 I-0.231233 J1.618638",
-                    "G03 X82.660913 Y93.623274 Z-0.125000 I-0.207004 J0.427867",
-                    "G03 X82.764851 Y94.311131 Z-0.125000 I-3.557163 J0.889282",
-                    "G03 X83.212143 Y102.534857 Z-0.125000 I-6575.535316 J361.770534",
-                    "G01 X80.547856 Y101.248651 Z-0.125000",
-                    "G01 X78.159182 Y96.930666 Z-0.125000",
-                    "G01 X77.975440 Y95.828202 Z-0.125000",
-                    "G01 X75.403024 Y96.379432 Z-0.125000",
-                    "G01 X75.403024 Y96.379432 Z-0.125000",
-                    "G00 Z5.000000"
-                    };
+  int k = 0;
+  char test[5][100] = {   "G01 X76.239258 Y136.657482 Z-0.125000 F400.000000",
+                          "G01 X76.174313 Y138.701707 Z-0.125000",
+                          "G03 X76.660677 Y138.678242 Z-0.125000 I0.747928 J10.450155",
+                          "G03 X83.975031 Y138.496286 Z-0.125000 I942.759146 J37750.374294",
+                          "G01 X83.845138 Y139.112552 Z-0.125000"
+                          };
   
-  Serial.println("start");
+  //Serial.println("start");
   
   while(1){
     Serial.println("next");
@@ -260,8 +248,7 @@ void executeGCode(){
     }
     
     
-    //s = test[k];
-    
+    //s = test[k++];  
     s = Serial.readString(); 
     s.toCharArray(cBuffer, 100);
 
@@ -284,12 +271,12 @@ void executeGCode(){
         z = atof(++c1);
         if(z > 0){
           lcd.print("move head mid  ");
-          Serial.println("move head mid");
+          //Serial.println("move head mid");
           plotter.moveHeadMid();
         }
         else{
           lcd.print("move head down");
-          Serial.println("move head down");
+          //Serial.println("move head down");
           plotter.moveHeadDown();
         }
       }
@@ -305,12 +292,12 @@ void executeGCode(){
         z = atof(++c1);
         if(z > 0){
           lcd.print("move head mid  ");
-          Serial.println("move head mid");
+          //Serial.println("move head mid");
           plotter.moveHeadMid();
         }
         else{
           lcd.print("move head down");
-          Serial.println("move head down");
+          //Serial.println("move head down");
           plotter.moveHeadDown();
         }
       }
@@ -326,12 +313,14 @@ void executeGCode(){
       }
     }
     else if(strstr(cBuffer, "G03")){
+      //Serial.println(cBuffer);
       if((c1 = strstr(cBuffer, "X")) && (c2 = strstr(cBuffer, "Y")) && (c3 = strstr(cBuffer, "I")) && (c4 = strstr(cBuffer, "J"))){
         x = atof(++c1);
         y = atof(++c2);
         i = atof(++c3);
         j = atof(++c4);
         lcd.print("arc CCW        ");
+        //Serial.println(y,6);
         plotter.arcAbsolute(x,y,i,j, CCW);
       }
     }
@@ -339,9 +328,7 @@ void executeGCode(){
       count--;
       lcd.print("invalid command"); 
     }
-    
-    //sprintf(cBuffer, "%d, %d %d, %d, %d, %d", tl, t1, t2, t3, t4, t5);
-    //Serial.println(cBuffer);
+   
     
     lcd.setCursor(0,2);
     sprintf(lcdBuffer, "%d ops", count++);
@@ -373,7 +360,7 @@ void executeGCode(){
   lcd.setCursor(0,3);
   sprintf(lcdBuffer, "%d moves, %ds      ", count, (millis() - startTime) / 1000);
   lcd.print(lcdBuffer);
-  Serial.print("end");
+  //Serial.print("end");
   
   while(buttons.getButtonEvent() != BUTTON_NONE){
     delayMicroseconds(1);
@@ -456,7 +443,7 @@ void loop(){
       case MENU_DRAW:
         switch(menuPosition){
           case 0:
-            drawSinc(2000);
+            drawSinc(2000l);
             break;
           case 1:
             drawCircle(5000);
