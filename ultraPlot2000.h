@@ -52,6 +52,7 @@
 /*********************************************************/
 /*	Constants			    
 /*********************************************************/
+#define DEBUG           0
 #define X_SPEED_MIN     80
 #define X_SPEED_MAX   	120
 #define BTN_DEBOUNCE_P  20  // button debounce period in ms

@@ -224,19 +224,20 @@ void executeGCode(){
   double x,y,z,i,j;
   int count = 1;
   unsigned long pauseTime, startTime = millis(); 
-  int ts, tl, t0, t1, t2, t3, t4, t5;
+  z_position_t pausePos;
  
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("[Executing GCode]");
 
-  int k = 0;
-  char test[5][100] = {   "G01 X76.239258 Y136.657482 Z-0.125000 F400.000000",
-                          "G01 X76.174313 Y138.701707 Z-0.125000",
-                          "G03 X76.660677 Y138.678242 Z-0.125000 I0.747928 J10.450155",
-                          "G03 X83.975031 Y138.496286 Z-0.125000 I942.759146 J37750.374294",
-                          "G01 X83.845138 Y139.112552 Z-0.125000"
-                          };
+//  int k = 0;
+//  char test[6][100] = {   "G00 X77.583856 Y176.185749",
+//                          "G01 Z-0.125000 F100.0(Penetrate)",
+//                          "G03 X77.760509 Y176.412419 Z-0.125000 I-0.017843 J0.196078",
+//                          "G03 X77.543226 Y176.596975 Z-0.125000 I-0.215832 J-0.033921",
+//                          "G02 X77.269796 Y176.608211 Z-0.125000 I-0.019060 J2.868845",
+//                          "G00 Z5.000000"
+//                          };
   
   //Serial.println("start");
   
@@ -340,6 +341,7 @@ void executeGCode(){
     
     if(buttons.getButtonEvent() != BUTTON_NONE){
       pauseTime = millis();
+      pausePos = plotter.z_axis.getPosition();
       plotter.moveHeadUp();
       lcd.setCursor(0,1);
       lcd.print("                   ");
@@ -347,10 +349,13 @@ void executeGCode(){
       lcd.print("paused             ");
       lcd.setCursor(0,3);
       lcd.print("                   ");
-      while(buttons.getButtonEvent() != BUTTON_NONE){
+      while(buttons.getButtonEvent() == BUTTON_NONE){
         delayMicroseconds(1);
       }
       startTime += millis() - pauseTime;
+      plotter.z_axis.setPosition(pausePos);
+      lcd.setCursor(0,2);
+      lcd.print("                   ");
     }
   }
   lcd.setCursor(0,1);

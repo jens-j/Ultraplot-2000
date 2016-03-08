@@ -11,10 +11,10 @@ int t0, t1, t2, t3 = 0;
 
 void setup(){
   printArray(Serial.list());
-  String portName = "/dev/ttyUSB1"; // Serial.list()[7]; //change the 0 to a 1 or 2 etc. to match your port
+  String portName = "/dev/ttyUSB0"; // Serial.list()[7]; //change the 0 to a 1 or 2 etc. to match your port
   myPort = new Serial(this, portName, 115200); 
   
-  reader = createReader("../gcode/gundam.ngc");   
+  reader = createReader("../gcode/hulk.ngc");   
 
 }
 

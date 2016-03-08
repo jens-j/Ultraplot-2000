@@ -6,3 +6,11 @@
 - Fix Y axis slowdown in the calibration routine
 
 - Z axis speed tuning
+
+- head toggle
+
+- GCode timer representation
+
+- GCode instruction count overflow
+
+- X axis watchdog timer

@@ -95,7 +95,8 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
   long x0, y0; // origin
   int x1, y1; // start
   int x2, y2; // position
-  long dx, dy; // position relative to the origin
+  long rx, ry; // distance of position relative to the origin
+  long dx, dy; // distance between the position and end point
   double phi; // angle of position
   double radius;
   double x2_d;
@@ -106,24 +107,29 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
   x0 = x1 + i;
   y0 = y1 + j;
   
-  dx = x2 - x0;
-  dy = y2 - y0;
+  dx = x3 - x2;
+  dy = y3 - y2;
+  
+  rx = x2 - x0;
+  ry = y2 - y0;
+  
   
   //sprintf(cBuffer, "\nx = %d, y = %d, i = %ld, j = %ld\n", x1, y1, i, j);
-  //sprintf(cBuffer, "\nstart(%d, %d), end(%d, %d), O(%ld, %ld), I(%ld, %ld), d(%ld, %ld)",  x1, y1, x3, y3, x0, y0, i, j, dx, dy);
-  //Serial.print(cBuffer);
+  if(DEBUG){
+    sprintf(cBuffer, "\nstart(%d, %d), pos(%d, %d), end(%d, %d), O(%ld, %ld), I(%ld, %ld), d(%ld, %ld)\n",  x1, y1, x2, y2, x3, y3, x0, y0, i, j, dx, dy);
+    Serial.print(cBuffer);
+  }
 
   radius = sqrt(pow((x3 - x0), 2) + pow((y3 - y0), 2));
 
   //Serial.println("\nStart\n");
 
-  //while(!(abs(x2-x3) < 2 && y2 == y3)){
-  while(!(y2 == y3 && (SIGN(x2) == SIGN(x3) || SIGN(x3) == ZERO))){
+  while(!(y2 == y3 && (SIGN(x2 - x0) == SIGN(x3 - x0) || x3 - x0 == 0) || x2 - x0 == 0)){
     
-    dx = x2 - x0;
-    dy = y2 - y0;
+    rx = x2 - x0;
+    ry = y2 - y0;
     
-    if(direction == CCW && (dx > 0 || (dx == 0 && dy < 0))){
+    if(direction == CCW && (rx > 0 || (rx == 0 && ry < 0))){
       //Serial.print("[CCW RH] ");
       y2++;
       y_axis.stepUp();
@@ -137,7 +143,7 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
       x2_d = x0 + (radius * cos(phi));   
       x_axis.setPosition(x2);
     } 
-    else if(direction == CCW && (dx < 0 || (dx == 0 && dy > 0))){
+    else if(direction == CCW && (rx < 0 || (rx == 0 && ry > 0))){
       //Serial.print("[CCW LH] ");
       y2--;
       y_axis.stepDown();
@@ -151,7 +157,7 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
       x2_d = x0 - (radius * cos(phi));
       x_axis.setPosition(x2);
     }
-    else if(direction == CW && (dx > 0 || (dx == 0 && dy > 0))){
+    else if(direction == CW && (rx > 0 || (rx == 0 && ry > 0))){
       //Serial.print("[CW RH] ");
       y2--;
       y_axis.stepDown();
@@ -165,7 +171,7 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
       x2_d = x0 + (radius * cos(phi));
       x_axis.setPosition(x2);
     }
-    else if(direction == CW && (dx < 0 || (dx == 0 && dy < 0))){
+    else if(direction == CW && (rx < 0 || (rx == 0 && ry < 0))){
       //Serial.print("[CW LH] ");
       y2++;
       y_axis.stepUp();
@@ -180,11 +186,15 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
       x_axis.setPosition(x2);
     }
     
-//   sprintf(cBuffer, "d(%ld, %ld), pos(%d, %d), end(%d, %d) ", dx, dy, x2, y2, x3, y3);
-//   Serial.print(cBuffer);
-//   Serial.print(radius, 3);
-//   Serial.print(", ");
-//   Serial.println(phi, 3);
+    if(DEBUG){
+      dx = x3 - x2;
+      dy = y3 - y2;
+      sprintf(cBuffer, "d(%ld, %ld), pos(%d, %d), end(%d, %d), ", dx, dy, x2, y2, x3, y3);
+      Serial.print(cBuffer);
+      Serial.print(radius, 3);
+      Serial.print(", ");
+      Serial.println(phi, 3);
+    }
   }
 }
 
