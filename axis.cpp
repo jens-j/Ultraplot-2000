@@ -209,10 +209,10 @@ void Y_axis::setPosition(int setPoint){
     int d = abs(position - setPoint);
     
     // set cooldown time
-    if(d - s < Y_COOLDOWN_RAMP)
-      cooldown = map(d- s, 0, Y_COOLDOWN_RAMP-1, Y_COOLDOWN_MAX, Y_COOLDOWN_MIN);
-    else if(s < Y_COOLDOWN_RAMP)
-      cooldown = map(s, 0, Y_COOLDOWN_RAMP-1, Y_COOLDOWN_MAX, Y_COOLDOWN_MIN);
+    if(abs(d - s) < Y_COOLDOWN_RAMP)
+      cooldown = map(abs(d- s), 0, Y_COOLDOWN_RAMP-1, Y_COOLDOWN_MAX, Y_COOLDOWN_MIN);
+    else if(abs(s) < Y_COOLDOWN_RAMP)
+      cooldown = map(abs(s), 0, Y_COOLDOWN_RAMP-1, Y_COOLDOWN_MAX, Y_COOLDOWN_MIN);
     else 
       cooldown = Y_COOLDOWN_MIN;
     s++;
@@ -265,8 +265,8 @@ z_position_t Z_axis::getPosition(){
 
 void Z_axis::moveRelative(int d){
  char cBuffer[100];
- sprintf(cBuffer, "move head %d", d);
- Serial.println(cBuffer); 
+ //sprintf(cBuffer, "move head %d", d);
+ //Serial.println(cBuffer); 
  int dist = d * 8;
  int step = dist;
  int cooldown;
@@ -275,18 +275,13 @@ void Z_axis::moveRelative(int d){
    
    if(abs(dist - step) < Z_COOLDOWN_RAMP){
      cooldown = map(abs(dist - step), 0, Z_COOLDOWN_RAMP-1, Z_COOLDOWN_MAX, Z_COOLDOWN_MIN);
-     Serial.print("a ");
    }
    else if(abs(step) <= Z_COOLDOWN_RAMP){
      cooldown = map(abs(step), 1, Z_COOLDOWN_RAMP, Z_COOLDOWN_MAX, Z_COOLDOWN_MIN);
-     Serial.print("b ");
    }
    else{
      cooldown = Z_COOLDOWN_MIN;
-     Serial.print("c ");
    }
-     
-   Serial.println(cooldown);
    
    if(step > 0){
      stepper.stepRight();
@@ -314,8 +309,8 @@ void Z_axis::setPosition(z_position_t setPoint){
     position = UP;
   }
     
-  sprintf(cBuffer, "set head from %d to %d", position, setPoint);
-  Serial.println(cBuffer); 
+  //sprintf(cBuffer, "set head from %d to %d", position, setPoint);
+  //Serial.println(cBuffer); 
 
   moveRelative(setPoint - position);
 

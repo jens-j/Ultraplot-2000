@@ -64,8 +64,8 @@
 #define Y_STEPPER_PWM     100
 #define X_COOLDOWN        2000 // in us
 #define Y_COOLDOWN_MIN    1000 // in us
-#define Y_COOLDOWN_MAX    4000 // in us 
-#define Y_COOLDOWN_RAMP   50   // in steps
+#define Y_COOLDOWN_MAX    2000 // in us 
+#define Y_COOLDOWN_RAMP   200  // in steps
 #define Z_COOLDOWN_MIN 	  500  // in us
 #define Z_COOLDOWN_MAX 	  5000 // in us
 #define Z_COOLDOWN_RAMP   20   // in steps
