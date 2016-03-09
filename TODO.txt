@@ -1,13 +1,7 @@
 
 - add EEPROM storage for calibration and position
 
-- working pause functionality
-
 - Fix Y axis slowdown in the calibration routine
-
-- Z axis speed tuning
-
-- head toggle
 
 - GCode timer representation
 

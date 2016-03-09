@@ -425,10 +425,8 @@ void loop(){
             if(plotter.z_axis.getPosition() == UP){
               plotter.moveHeadDown();
             }
-            else if(plotter.z_axis.getPosition() == MID)
-              plotter.moveHeadUp();
             else{
-              plotter.moveHeadMid();
+              plotter.moveHeadUp();
             }
             break;
           case 1:
