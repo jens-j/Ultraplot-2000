@@ -48,6 +48,8 @@ class Y_axis{
   unsigned long cooldownTime;
   Stepper stepper;
   void step_ISR();
+  void stepUp(int); // step with specific cooldown
+  void stepDown(int);
 public:
   Y_axis();
   void stepUp();

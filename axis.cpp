@@ -159,15 +159,18 @@ stepper(MOTOR_Y0, MOTOR_Y1, MOTOR_Y2, MOTOR_Y3, Y_STEPPER_PWM)
   cooldownTime = micros();
 }
 
-
 void Y_axis::stepDown(){
+  stepDown(Y_COOLDOWN_MAX);
+}
+
+void Y_axis::stepDown(int cooldown){
   if(--position < bounds.b0){
     panic("y < SW bound"); 
   }
   if(digitalRead(BUTTON_Y0) == LOW){
     panic("y < HW bound");
   }
-  while((micros() - cooldownTime) < Y_COOLDOWN){
+  while((micros() - cooldownTime) < cooldown){
     delayMicroseconds(1);
   }
   stepper.stepRight();
@@ -175,13 +178,17 @@ void Y_axis::stepDown(){
 }
 
 void Y_axis::stepUp(){
+  stepUp(Y_COOLDOWN_MAX);
+}
+
+void Y_axis::stepUp(int cooldown){
   if(++position > bounds.b1){
     panic("y > SW bound"); 
   }
   if(digitalRead(BUTTON_Y1) == LOW){
       panic("y > HW bound");
   }
-  while((micros() - cooldownTime) < Y_COOLDOWN){
+  while((micros() - cooldownTime) < cooldown){
     delayMicroseconds(1);
   }
   stepper.stepLeft();
@@ -193,13 +200,41 @@ int Y_axis::getPosition(){
 }
 
 void Y_axis::setPosition(int setPoint){
+  int cooldown;
+  int s = 0;
+  int d;
   
-  while(setPoint < position){
-    stepDown();
+  while(setPoint != position){
+    
+    int d = abs(position - setPoint);
+    
+    // set cooldown time
+    if(d - s < Y_COOLDOWN_RAMP)
+      cooldown = map(d- s, 0, Y_COOLDOWN_RAMP-1, Y_COOLDOWN_MAX, Y_COOLDOWN_MIN);
+    else if(s < Y_COOLDOWN_RAMP)
+      cooldown = map(s, 0, Y_COOLDOWN_RAMP-1, Y_COOLDOWN_MAX, Y_COOLDOWN_MIN);
+    else 
+      cooldown = Y_COOLDOWN_MIN;
+    s++;
+     
+    if(setPoint < position)
+      stepDown(cooldown);
+    if(setPoint > position)
+      stepUp(cooldown);
   }
-  while(setPoint > position){
-    stepUp(); 
-  }
+
+//  while(setPoint < position){
+//    if(s < Y_COOLDOWN_RAMP)
+//      cooldown = map(s, 0, Y_COOLDOWN_RAMP-1, Y_COOLDOWN_MAX, Y_COOLDOWN_MIN);
+//    if(
+//    stepDown(cooldown);
+//    s++;
+//  }
+//  while(setPoint > position){
+//    cooldown = constrain(map(s, 0, Y_COOLDOWN_RAMP-1, Y_COOLDOWN_MAX, Y_COOLDOWN_MIN), Y_COOLDOWN_MIN, Y_COOLDOWN_MAX);
+//    stepUp(cooldown); 
+//    s++;
+//  }
 }
 
 void Y_axis::setBounds(bounds_t b){
@@ -232,8 +267,27 @@ void Z_axis::moveRelative(int d){
  char cBuffer[100];
  sprintf(cBuffer, "move head %d", d);
  Serial.println(cBuffer); 
- int step = d * 8;
+ int dist = d * 8;
+ int step = dist;
+ int cooldown;
+ 
  while(step != 0){
+   
+   if(abs(dist - step) < Z_COOLDOWN_RAMP){
+     cooldown = map(abs(dist - step), 0, Z_COOLDOWN_RAMP-1, Z_COOLDOWN_MAX, Z_COOLDOWN_MIN);
+     Serial.print("a ");
+   }
+   else if(abs(step) <= Z_COOLDOWN_RAMP){
+     cooldown = map(abs(step), 1, Z_COOLDOWN_RAMP, Z_COOLDOWN_MAX, Z_COOLDOWN_MIN);
+     Serial.print("b ");
+   }
+   else{
+     cooldown = Z_COOLDOWN_MIN;
+     Serial.print("c ");
+   }
+     
+   Serial.println(cooldown);
+   
    if(step > 0){
      stepper.stepRight();
      step--;
@@ -243,7 +297,7 @@ void Z_axis::moveRelative(int d){
      step++;
    }
    
-   delayMicroseconds(Z_COOLDOWN);
+   delayMicroseconds(cooldown);
  } 
 }
 

@@ -124,7 +124,7 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
 
   //Serial.println("\nStart\n");
 
-  while(!(y2 == y3 && (SIGN(x2 - x0) == SIGN(x3 - x0) || x3 - x0 == 0) || x2 - x0 == 0)){
+  while(!(y2 == y3 && (SIGN(x2 - x0) == SIGN(x3 - x0) || x3 - x0 == 0 || x2 - x0 == 0))){
     
     rx = x2 - x0;
     ry = y2 - y0;
