@@ -61,7 +61,7 @@
 #define Y_STEPSIZE        0.0212 // in mm | Always use the Y_STEPSIZE
 #define XY_SCALE          (X_STEPSIZE / Y_STEPSIZE)
 #define YX_SCALE          (Y_STEPSIZE / X_STEPSIZE)
-#define Y_STEPPER_PWM     120
+#define Y_STEPPER_PWM     110
 #define X_COOLDOWN        2000 // in us
 #define Y_COOLDOWN_MIN    1000 // in us
 #define Y_COOLDOWN_MAX    2000 // in us 

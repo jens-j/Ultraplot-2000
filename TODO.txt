@@ -8,3 +8,9 @@
 - GCode instruction count overflow
 
 - X axis watchdog timer
+
+- nicer X ramp
+
+- extra low head position
+
+- switching to low head mode when calibrating
