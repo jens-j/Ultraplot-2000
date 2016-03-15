@@ -1,4 +1,5 @@
 #include <LiquidCrystal.h>
+#include <EEPROM.h>
 #include "TimerOne.h"
 #include "ultraPlot2000.h"
 #include "plotter.h"
@@ -74,7 +75,7 @@ void panic(char *s){
   lcd.setCursor(0, 2);
   lcd.print(s);
 
-  plotter.moveHeadUp();
+  plotter.moveHead(Z_UP);
   
   while(1){}
 }
@@ -84,12 +85,14 @@ void calibrate(){
   int xbound0, xbound1;
   int ybound0, ybound1;
   int xrange, yrange;
-  int refresh = 0;
+  unsigned long refresh = 0;
   
   
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("[Calibration mode]");
+  
+  plotter.moveHead(Z_LOW);
   
   // X-axis
   lcd.setCursor(0, 2);
@@ -132,7 +135,7 @@ void calibrate(){
     else if(buttons.isPressed() == BUTTON_RIGHT){
       plotter.y_axis.stepUp();  
     }
-    if(millis() - refresh > 200){
+    if(millis() - refresh > 300){
       lcd.setCursor(0, 3);
       lcd.print("<- ");
       lcd.print(plotter.y_axis.getPosition());
@@ -148,10 +151,10 @@ void calibrate(){
     if(buttons.isPressed() == BUTTON_LEFT){
       plotter.y_axis.stepDown();  
     }
-    if(buttons.isPressed() == BUTTON_RIGHT){
+    else if(buttons.isPressed() == BUTTON_RIGHT){
       plotter.y_axis.stepUp();  
     }
-    if(millis() - refresh > 100){
+    if(millis() - refresh > 300){
       lcd.setCursor(0, 3);
       lcd.print("<- ");
       lcd.print(plotter.y_axis.getPosition());
@@ -186,6 +189,7 @@ void calibrate(){
     delayMicroseconds(1);
   }
   
+  plotter.moveHead(Z_UP);
   lcd.clear();
 }
 
@@ -222,13 +226,17 @@ void executeGCode(){
   char cBuffer[100];
   char lcdBuffer[20];
   double x,y,z,i,j;
-  int count = 1;
-  unsigned long pauseTime, startTime = millis(); 
+  long int count = 1;
+  int seconds, minutes, hours;
+  unsigned long pauseTime;
+  unsigned long startTime = millis(); 
   z_position_t pausePos;
  
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("[Executing GCode]");
+  
+  plotter.moveHead(Z_UP);
 
 //  int k = 0;
 //  char test[6][100] = {   "G00 X77.583856 Y176.185749",
@@ -271,14 +279,14 @@ void executeGCode(){
       else if(c1 = strstr(cBuffer, "Z")){
         z = atof(++c1);
         if(z > 0){
-          lcd.print("move head mid  ");
+          lcd.print("move head low  ");
           //Serial.println("move head mid");
-          plotter.moveHeadMid();
+          plotter.moveHead(Z_LOW);
         }
         else{
           lcd.print("move head down");
           //Serial.println("move head down");
-          plotter.moveHeadDown();
+          plotter.moveHead(Z_DOWN);
         }
       }
     }
@@ -294,12 +302,12 @@ void executeGCode(){
         if(z > 0){
           lcd.print("move head mid  ");
           //Serial.println("move head mid");
-          plotter.moveHeadMid();
+          plotter.moveHead(Z_LOW);
         }
         else{
           lcd.print("move head down");
           //Serial.println("move head down");
-          plotter.moveHeadDown();
+          plotter.moveHead(Z_DOWN);
         }
       }
     }
@@ -332,17 +340,22 @@ void executeGCode(){
    
     
     lcd.setCursor(0,2);
-    sprintf(lcdBuffer, "%d ops", count++);
+    sprintf(lcdBuffer, "%ld ops", count++);
     lcd.print(lcdBuffer);
     
+    // calculate & print elapsed time
+    seconds = millis() / 1000;
+    hours = seconds / 3600;
+    minutes = (seconds / 60) % 60;
+    seconds = seconds % 60;
     lcd.setCursor(0,3);
-    sprintf(lcdBuffer, "time %ds", (millis() - startTime) / 1000);
+    sprintf(lcdBuffer, "time: %02d:%02d:%02d", hours, minutes, seconds);
     lcd.print(lcdBuffer);
     
     if(buttons.getButtonEvent() != BUTTON_NONE){
       pauseTime = millis();
       pausePos = plotter.z_axis.getPosition();
-      plotter.moveHeadUp();
+      plotter.moveHead(Z_UP);
       lcd.setCursor(0,1);
       lcd.print("                   ");
       lcd.setCursor(0,2);
@@ -353,19 +366,22 @@ void executeGCode(){
         delayMicroseconds(1);
       }
       startTime += millis() - pauseTime;
-      plotter.z_axis.setPosition(pausePos);
+      plotter.moveHead(pausePos);
       lcd.setCursor(0,2);
       lcd.print("                   ");
     }
   }
+  
+  // Done
+  plotter.moveHead(Z_UP);
+  
   lcd.setCursor(0,1);
   lcd.print("                   ");
   lcd.setCursor(0,2);
   lcd.print("done:              ");
   lcd.setCursor(0,3);
-  sprintf(lcdBuffer, "%d moves, %ds      ", count, (millis() - startTime) / 1000);
+  sprintf(lcdBuffer, "%ld moves, %ds      ", count, (millis() - startTime) / 1000);
   lcd.print(lcdBuffer);
-  //Serial.print("end");
   
   while(buttons.getButtonEvent() != BUTTON_NONE){
     delayMicroseconds(1);
@@ -422,11 +438,11 @@ void loop(){
       case MENU_MAIN:
         switch(menuPosition){
           case 0:
-            if(plotter.z_axis.getPosition() == UP){
-              plotter.moveHeadDown();
+            if(plotter.z_axis.getPosition() == Z_UP){
+              plotter.moveHead(Z_DOWN);
             }
             else{
-              plotter.moveHeadUp();
+              plotter.moveHead(Z_UP);
             }
             break;
           case 1:

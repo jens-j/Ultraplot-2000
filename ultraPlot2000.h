@@ -67,8 +67,8 @@
 #define Y_COOLDOWN_MAX    2000 // in us 
 #define Y_COOLDOWN_RAMP   200  // in steps
 #define Z_COOLDOWN_MIN 	  800  // in us
-#define Z_COOLDOWN_MAX 	  4000 // in us
-#define Z_COOLDOWN_RAMP   50   // in steps
+#define Z_COOLDOWN_MAX 	  3000 // in us
+#define Z_COOLDOWN_RAMP   40   // in steps
 
 /*********************************************************/
 /*	Types			    

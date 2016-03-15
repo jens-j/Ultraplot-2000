@@ -22,10 +22,12 @@ class Plotter{
 		Y_axis y_axis;
 		Z_axis z_axis;
 		
+                // constructor
 		Plotter();
-		void moveHeadUp();
-		void moveHeadDown();
-		void moveHeadMid();
+
+                // head
+                void moveHead(z_position_t);
+
 		// pixel coordinate functions
 		void moveAbsolute(int, int);
 		void quickAbsolute(int, int);
@@ -33,6 +35,7 @@ class Plotter{
 		void arcAbsoluteCW(int, int, double, double);
 		void arcAbsoluteCCW(int, int, double, double);
 		void arcAbsolute(int, int, long, long, int);
+
 		// mm coordinates functions
                 position_t getPosition();
 		void initPosition(double, double);

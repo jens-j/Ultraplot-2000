@@ -5,17 +5,16 @@
 #include "stepper.h"
 #include "TimerOne.h"
 
-
 /*********************************************************/
 /*	X axis 			    
 /*********************************************************/
 X_axis::X_axis() : sensor() {
   sdata0 = 0;
-  vPosition = 0;
-  rPosition = 0;
+  loadPosition();
+  vPosition = (int) (rPosition * XY_SCALE);
+  loadBounds();
   setPoint = 0;
   direction = IDLE;
-  bounds = {-4000, 4000};
   cooldownTime = micros();
 }
 
@@ -51,10 +50,10 @@ void X_axis::setSpeed(){
     speed = 75;
   else if(diff < 25)
     speed = 80;
-  else if(diff < 100)
+  else // if(diff < 100)
     speed = 90;
-  else
-    speed = 100;
+//  else
+//    speed = 100;
    
    if(direction == LEFT and rPosition > setPoint){
      analogWrite(MOTOR_X0, speed);
@@ -154,8 +153,8 @@ x_direction_t X_axis::getDirection(){
 Y_axis::Y_axis() : 
 stepper(MOTOR_Y0, MOTOR_Y1, MOTOR_Y2, MOTOR_Y3, Y_STEPPER_PWM)
 {
-  position = 0;
-  bounds = {-10000,10000};
+  loadPosition();
+  loadBounds();
   cooldownTime = micros();
 }
 
@@ -222,19 +221,6 @@ void Y_axis::setPosition(int setPoint){
     if(setPoint > position)
       stepUp(cooldown);
   }
-
-//  while(setPoint < position){
-//    if(s < Y_COOLDOWN_RAMP)
-//      cooldown = map(s, 0, Y_COOLDOWN_RAMP-1, Y_COOLDOWN_MAX, Y_COOLDOWN_MIN);
-//    if(
-//    stepDown(cooldown);
-//    s++;
-//  }
-//  while(setPoint > position){
-//    cooldown = constrain(map(s, 0, Y_COOLDOWN_RAMP-1, Y_COOLDOWN_MAX, Y_COOLDOWN_MIN), Y_COOLDOWN_MIN, Y_COOLDOWN_MAX);
-//    stepUp(cooldown); 
-//    s++;
-//  }
 }
 
 void Y_axis::setBounds(bounds_t b){
@@ -256,7 +242,7 @@ bounds_t Y_axis::getBounds(){
 Z_axis::Z_axis() : 
 stepper(MOTOR_Z0, MOTOR_Z1, MOTOR_Z2, MOTOR_Z3, 255) 
 {
-  position = UNKNOWN;
+  loadPosition();
 }
 
 z_position_t Z_axis::getPosition(){
@@ -304,9 +290,9 @@ void Z_axis::setPosition(z_position_t setPoint){
     return;
 
   // force the head in a up position after startup
-  if(position == UNKNOWN){
+  if(position == Z_UNKNOWN){
     moveRelative(-40);
-    position = UP;
+    position = Z_UP;
   }
     
   //sprintf(cBuffer, "set head from %d to %d", position, setPoint);
@@ -316,4 +302,5 @@ void Z_axis::setPosition(z_position_t setPoint){
 
   position = setPoint;
 }
+
 

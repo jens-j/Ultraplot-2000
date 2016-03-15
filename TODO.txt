@@ -1,16 +1,30 @@
+BUGS
 
-- add EEPROM storage for calibration and position
 
-- Fix Y axis slowdown in the calibration routine
+SMALL FEATURES
 
-- GCode timer representation
+- faster x speed for quickmove
 
-- GCode instruction count overflow
+- parametric X ramp
+
+- y ramp during calibration
+
+- frame/limit setting to center images
+
+
+BIGGER FEATURES
+
+- scrolling menus 
 
 - X axis watchdog timer
 
-- nicer X ramp
+- brown-out store routine
+
+
+IMPLEMENTED BUT NOT YET TESTED:
+
+- GCode timer representation
 
 - extra low head position
 
-- switching to low head mode when calibrating
+- EEPROM storage for calibration and position

@@ -208,17 +208,7 @@ void Plotter::arcAbsolute(double setX, double setY, double i, double j, int dire
 }
 
 
-void Plotter::moveHeadUp(){
-  //Serial.println("f: move head up");
-  z_axis.setPosition(UP);
+void Plotter::moveHead(z_position_t pos){
+  z_axis.setPosition(pos);
 }
 
-void Plotter::moveHeadDown(){
-  //Serial.println("f: move head down");
-  z_axis.setPosition(DOWN);
-}
-
-void Plotter::moveHeadMid(){
-  //Serial.println("f: move head mid");
-  z_axis.setPosition(MID);
-}

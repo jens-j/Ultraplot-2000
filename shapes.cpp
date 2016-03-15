@@ -9,9 +9,9 @@ void drawSinc(int size){
   long i;
   long y;
   
-  plotter.moveHeadUp();
+  plotter.moveHead(Z_UP);
   plotter.quickAbsolute(-size,0);
-  plotter.moveHeadDown();
+  plotter.moveHead(Z_DOWN);
   
   for(i = -size; i < size; i++){
     plotter.x_axis.setPosition(i);
@@ -21,7 +21,7 @@ void drawSinc(int size){
     plotter.y_axis.setPosition(y);
   }
   
-  plotter.moveHeadUp();
+  plotter.moveHead(Z_UP);
   plotter.quickAbsolute(0, 0);
 }
 
@@ -32,9 +32,9 @@ int i;
   
   diameter = diameter / 2;
   
-  plotter.moveHeadUp();
+  plotter.moveHead(Z_UP);
   plotter.quickAbsolute((int) (diameter * YX_SCALE), 0);
-  plotter.moveHeadDown();
+  plotter.moveHead(Z_DOWN);
   
   for(i = 1; i <= diameter; i++){
     plotter.y_axis.stepUp();
@@ -76,19 +76,19 @@ int i;
     Serial.println(x_pos);
   }
   
-  plotter.moveHeadUp();
+  plotter.moveHead(Z_UP); 
   plotter.quickAbsolute(0, 0);
 }
 
 void drawSquare(double size){
   Serial.println("drawSware");
   plotter.quickAbsolute(0.0, 0.0);
-  plotter.moveHeadDown();
+  plotter.moveHead(Z_DOWN);
   plotter.moveAbsolute(size, 0.0);
   plotter.moveAbsolute(size, size);
   plotter.moveAbsolute(0.0, size);
   plotter.moveAbsolute(0.0, 0.0);
-  plotter.moveHeadUp();  
+  plotter.moveHead(Z_UP);  
 }
 
 
