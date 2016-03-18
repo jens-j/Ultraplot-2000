@@ -8,7 +8,7 @@
 
 
 // positions of the plotter head 
-enum z_position_t  {Z_UP = 0, Z_DOWN = 40, Z_MID = 30, Z_LOW = 35, Z_UNKNOWN = 255};
+enum z_position_t  {Z_UP = 0, Z_DOWN = 40, Z_MID = 30, Z_LOW = 37, Z_UNKNOWN = 255};
 enum x_direction_t {LEFT, RIGHT, IDLE};
 enum rom_address_t {ROM_X = 0, ROM_Y = 2, ROM_Z = 4, ROM_X_LBOUND = 6, ROM_X_RBOUND = 8, ROM_Y_LBOUND = 6, ROM_Y_RBOUND = 8};
 
@@ -23,14 +23,17 @@ class X_axis{
   int rPosition;
   int setPoint;    // in real coordinates
   bounds_t bounds; // in real coordinates
+  boolean quick;   // flag to enable quick move
   x_direction_t direction;
   unsigned long cooldownTime;
   Sensor sensor;
+  void initMove(int); 
   void setSpeed();
   
 public:
   X_axis();
-  void isr();
+  void sensorIsr();
+  void wdTimerIsr();
   void stepLeft();
   void stepRight();
   int getPosition();

@@ -53,8 +53,6 @@
 /*	Constants			    
 /*********************************************************/
 #define DEBUG             0   // enables debug prints
-#define X_SPEED_MIN       80  // PWM 
-#define X_SPEED_MAX   	  100 // PWM
 #define BTN_DEBOUNCE_P    20  // button debounce period in ms
 #define BTN_RETRIGGER_P   300 // button retrigger period in ms
 #define X_STEPSIZE        0.0353 // in mm | Because the X resoluton is scaled to the Y resolution,
@@ -62,6 +60,10 @@
 #define XY_SCALE          (X_STEPSIZE / Y_STEPSIZE)
 #define YX_SCALE          (Y_STEPSIZE / X_STEPSIZE)
 #define Y_STEPPER_PWM     110
+#define X_SPEED_MIN       75   // PWM 
+#define X_SPEED_QUICK     120  // PWM 
+#define X_SPEED_DRAW      85   // PWM 
+#define X_SPEED_SLOPE     0.25 // PWM / distance 
 #define X_COOLDOWN        2000 // in us
 #define Y_COOLDOWN_MIN    1000 // in us
 #define Y_COOLDOWN_MAX    2000 // in us 

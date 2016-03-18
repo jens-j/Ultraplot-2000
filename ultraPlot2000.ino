@@ -1,3 +1,4 @@
+#include <avr/wdt.h>
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
 #include "TimerOne.h"
@@ -51,9 +52,14 @@ int digitalPinToInterrupt(int pin){
 
 
 void sensorIsrDispatcher(){
-  plotter.x_axis.isr();
+  plotter.x_axis.sensorIsr();
 }
 
+
+ISR(WDT_vect){
+  plotter.x_axis.wdTimerIsr();
+}
+  
 
 void timerIsrDispatcher(){
   buttons.isr(); 
@@ -61,21 +67,24 @@ void timerIsrDispatcher(){
 
 
 void panic(char *s){
+  
+  // disable interrupts
+  WDTCSR &= ~(1<<WDIE); 
   detachInterrupt(digitalPinToInterrupt(SENSOR_X0));
   detachInterrupt(digitalPinToInterrupt(SENSOR_X1));
   Timer1.detachInterrupt();
   
+  // stop X axis motor
   digitalWrite(MOTOR_X0, LOW);
   digitalWrite(MOTOR_X1, LOW);
+  
+  plotter.moveHead(Z_UP);
   
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("[Panic!]");
-  
   lcd.setCursor(0, 2);
   lcd.print(s);
-
-  plotter.moveHead(Z_UP);
   
   while(1){}
 }
@@ -92,7 +101,7 @@ void calibrate(){
   lcd.setCursor(0, 0);
   lcd.print("[Calibration mode]");
   
-  plotter.moveHead(Z_LOW);
+  plotter.moveHead(Z_MID);
   
   // X-axis
   lcd.setCursor(0, 2);
@@ -135,7 +144,7 @@ void calibrate(){
     else if(buttons.isPressed() == BUTTON_RIGHT){
       plotter.y_axis.stepUp();  
     }
-    if(millis() - refresh > 300){
+    if(millis() - refresh > 200){
       lcd.setCursor(0, 3);
       lcd.print("<- ");
       lcd.print(plotter.y_axis.getPosition());
@@ -154,7 +163,7 @@ void calibrate(){
     else if(buttons.isPressed() == BUTTON_RIGHT){
       plotter.y_axis.stepUp();  
     }
-    if(millis() - refresh > 300){
+    if(millis() - refresh > 200){
       lcd.setCursor(0, 3);
       lcd.print("<- ");
       lcd.print(plotter.y_axis.getPosition());
@@ -393,7 +402,7 @@ void executeGCode(){
 
 
 void setup(){
-  
+  char buffer[100];
   pinMode(MOTOR_X0, OUTPUT);
   pinMode(MOTOR_X1, OUTPUT);
   pinMode(MOTOR_Y0, OUTPUT);
@@ -405,6 +414,14 @@ void setup(){
   pinMode(MOTOR_Z2, OUTPUT);
   pinMode(MOTOR_Z3, OUTPUT);
   
+  Serial.begin(115200);
+  Serial.setTimeout(20);
+  
+  // set up WDT interrupt
+  wdt_reset();
+  WDTCSR |= (1<<WDCE) | (1<<WDE); // change enable
+  WDTCSR = (1<<WDP2) | (1<<WDP1); // 1s
+  
   // attach external interrupt for the sensor
   attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);
   attachInterrupt(digitalPinToInterrupt(SENSOR_X1), sensorIsrDispatcher, CHANGE);
@@ -414,8 +431,6 @@ void setup(){
   Timer1.disablePwm(MOTOR_X1);
   Timer1.attachInterrupt(timerIsrDispatcher);
 
-  Serial.begin(115200);
-  Serial.setTimeout(20);
   lcd.begin(20, 4);
   printMenu();
 }

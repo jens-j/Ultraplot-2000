@@ -3,10 +3,6 @@ BUGS
 
 SMALL FEATURES
 
-- faster x speed for quickmove
-
-- parametric X ramp
-
 - y ramp during calibration
 
 - frame/limit setting to center images
@@ -16,15 +12,17 @@ BIGGER FEATURES
 
 - scrolling menus 
 
-- X axis watchdog timer
+- brown-out save routine
 
-- brown-out store routine
+- PID control to get consistent X speeds
 
 
-IMPLEMENTED BUT NOT YET TESTED:
-
-- GCode timer representation
-
-- extra low head position
+IMPLEMENTED BUT NOT COMLETELY TESTED:
 
 - EEPROM storage for calibration and position
+
+- parametric X ramp
+
+- faster x speed for quickmove
+
+- X axis watchdog timer

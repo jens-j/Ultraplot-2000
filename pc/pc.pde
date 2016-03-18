@@ -14,7 +14,7 @@ void setup(){
   String portName = "/dev/ttyUSB0"; // Serial.list()[7]; //change the 0 to a 1 or 2 etc. to match your port
   myPort = new Serial(this, portName, 115200); 
   
-  reader = createReader("../gcode/botanic.ngc");   
+  reader = createReader("../gcode/batman.ngc");   
 
 }
 

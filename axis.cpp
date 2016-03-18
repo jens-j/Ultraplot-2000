@@ -1,3 +1,4 @@
+#include <avr/wdt.h>
 #include "Arduino.h"
 #include "ultraPlot2000.h"
 #include "axis.h"
@@ -12,67 +13,82 @@ X_axis::X_axis() : sensor() {
   sdata0 = 0;
   loadPosition();
   vPosition = (int) (rPosition * XY_SCALE);
-  loadBounds();
+  //loadBounds();
+  bounds = {-4000, 4000};
   setPoint = 0;
+  quick = false;
   direction = IDLE;
   cooldownTime = micros();
 }
 
-void X_axis::isr(){
-  //char cBuffer[100];
+void X_axis::sensorIsr(){
+  
+  wdt_reset();
   int sdata = sensor.decodeSensor();
   
-  if(sdata - sdata0 == 1 || sdata - sdata0 == -3)
+  if(sdata - sdata0 == 1 || sdata - sdata0 == -3){
     rPosition++;
-  else
+  }
+  else{
     rPosition--; 
-    
+  }
+  
   if(rPosition < bounds.b0){
     panic("x < SW bound");
   }
   if(rPosition > bounds.b1){
     panic("x > SW bound");
   }  
-    
+ 
   setSpeed();
-  
-  //sprintf(cBuffer, "x = %d", rPosition);
-  //Serial.println(cBuffer);
-  
   sdata0 = sdata;  
 }
+
+
+void X_axis::wdTimerIsr(){
+  panic("wdt ovf: x stuck");
+}
+
 
 void X_axis::setSpeed(){
   int speed;
   int diff = abs(setPoint - rPosition);
   
-  if(diff < 10)
-    speed = 75;
-  else if(diff < 25)
-    speed = 80;
-  else // if(diff < 100)
-    speed = 90;
-//  else
-//    speed = 100;
-   
-   if(direction == LEFT and rPosition > setPoint){
-     analogWrite(MOTOR_X0, speed);
-   }
-   else if(direction == RIGHT and rPosition < setPoint){
-     analogWrite(MOTOR_X1, speed);
-   }
-   else{
-     analogWrite(MOTOR_X0, 0);
-     analogWrite(MOTOR_X1, 0);
-     if(direction == IDLE){
-       //Serial.println("overshot");
-     }
-     else{
-       cooldownTime = micros();
-       direction = IDLE;
-     }
-   }
- }
+  // ramp the speed based on the distance to the setpoint
+  speed = X_SPEED_MIN + (int) (X_SPEED_SLOPE * diff);
+  
+  // constrain to the maximal speed for drawing or quick move
+  if(quick = true)
+    speed = constrain(speed, X_SPEED_MIN, X_SPEED_QUICK);
+  else
+    speed = constrain(speed, X_SPEED_MIN, X_SPEED_DRAW);
+  
+  // write the speed to the motor 
+  if(direction == LEFT and rPosition > setPoint){
+    analogWrite(MOTOR_X0, speed);
+  }
+  else if(direction == RIGHT and rPosition < setPoint){
+    analogWrite(MOTOR_X1, speed);
+  }
+  else{ // end position reached  
+  
+    // disable wdt interrupt
+    WDTCSR &= ~(1<<WDIE); 
+    
+    // step the motor
+    analogWrite(MOTOR_X0, 0);
+    analogWrite(MOTOR_X1, 0);
+    quick = false;
+    
+    if(direction == IDLE){
+      //Serial.println("overshot");
+    }
+    else{
+      cooldownTime = micros();
+      direction = IDLE;
+    }
+  }
+}
 
 void X_axis::stepLeft(){
   setPosition(setPoint-1);
@@ -83,14 +99,10 @@ void X_axis::stepRight(){
 }
 
 int X_axis::getPosition(){
-  //char cBuffer[100];
   // wait for any moves to complete
   while(direction != IDLE){
     delayMicroseconds(1);
   }
-  
-  //sprintf(cBuffer, "get x (%d)", vPosition);
-  //Serial.println(cBuffer);
   
   // convert physical to virtual coordinates
   return vPosition;
@@ -101,24 +113,33 @@ int X_axis::getRealPosition(){
 }
 
 void X_axis::setPosition(int setp){
-  //char cBuffer[100];
+
+  // wait for the head to settle from the previous move
   while(direction != IDLE || (micros() - cooldownTime) < X_COOLDOWN){
     delayMicroseconds(1);
   }
   
-  //sprintf(cBuffer, "set x (%d)", setp);
-  //Serial.println(cBuffer);
-  
-  quickSetPosition(setp);
+  quick = false;
+  initMove(setp);
 }
 
 void X_axis::quickSetPosition(int setp){
+  quick = true;
+  initMove(setp);
+}
+
+void X_axis::initMove(int setp){
   
   vPosition = setp;
   
   // convert virtual to physical coordinates
-  setPoint = (int) (setp * YX_SCALE);
-   
+  setPoint = (int) (setp * YX_SCALE);  
+  
+  // enable watchdog timer interrupt
+  wdt_reset();  
+  WDTCSR |= (1<<WDIE); 
+  
+  // set direction and speed
   direction = IDLE;
   if(rPosition > setPoint){
     direction = LEFT;
@@ -127,8 +148,9 @@ void X_axis::quickSetPosition(int setp){
   else if(rPosition < setPoint){
     direction = RIGHT;
     setSpeed(); 
-  } 
+  }  
 }
+
 
 void X_axis::setBounds(bounds_t b){
   bounds = b;  
@@ -154,7 +176,8 @@ Y_axis::Y_axis() :
 stepper(MOTOR_Y0, MOTOR_Y1, MOTOR_Y2, MOTOR_Y3, Y_STEPPER_PWM)
 {
   loadPosition();
-  loadBounds();
+  //loadBounds();
+  bounds = {-6000, 6000};
   cooldownTime = micros();
 }
 
@@ -242,7 +265,8 @@ bounds_t Y_axis::getBounds(){
 Z_axis::Z_axis() : 
 stepper(MOTOR_Z0, MOTOR_Z1, MOTOR_Z2, MOTOR_Z3, 255) 
 {
-  loadPosition();
+  //loadPosition(); 
+  position = Z_UNKNOWN;
 }
 
 z_position_t Z_axis::getPosition(){
