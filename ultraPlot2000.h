@@ -61,8 +61,8 @@
 #define YX_SCALE          (Y_STEPSIZE / X_STEPSIZE)
 #define Y_STEPPER_PWM     110
 #define X_SPEED_MIN       75   // PWM 
-#define X_SPEED_QUICK     120  // PWM 
-#define X_SPEED_DRAW      85   // PWM 
+#define X_SPEED_QUICK     110  // PWM 
+#define X_SPEED_DRAW      80   // PWM 
 #define X_SPEED_SLOPE     0.25 // PWM / distance 
 #define X_COOLDOWN        2000 // in us
 #define Y_COOLDOWN_MIN    1000 // in us

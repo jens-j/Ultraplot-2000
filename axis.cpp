@@ -58,7 +58,7 @@ void X_axis::setSpeed(){
   speed = X_SPEED_MIN + (int) (X_SPEED_SLOPE * diff);
   
   // constrain to the maximal speed for drawing or quick move
-  if(quick = true)
+  if(quick == true)
     speed = constrain(speed, X_SPEED_MIN, X_SPEED_QUICK);
   else
     speed = constrain(speed, X_SPEED_MIN, X_SPEED_DRAW);

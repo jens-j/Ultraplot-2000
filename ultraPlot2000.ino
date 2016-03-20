@@ -129,7 +129,7 @@ void calibrate(){
   xrange = xbound1 - xbound0;
   plotter.x_axis.setBounds({0, xrange - 1});
   plotter.x_axis.initPosition(xrange - 1); 
-  plotter.x_axis.setPosition(xrange * XY_SCALE / 2);
+  plotter.x_axis.quickSetPosition(xrange * XY_SCALE / 2);
   
   
   // Y-axis
@@ -360,9 +360,11 @@ void executeGCode(){
     lcd.setCursor(0,3);
     sprintf(lcdBuffer, "time: %02d:%02d:%02d", hours, minutes, seconds);
     lcd.print(lcdBuffer);
-    
+
+    // pause
     if(buttons.getButtonEvent() != BUTTON_NONE){
       pauseTime = millis();
+      while(plotter.x_axis.getDirection() != IDLE){} // finish last move
       pausePos = plotter.z_axis.getPosition();
       plotter.moveHead(Z_UP);
       lcd.setCursor(0,1);

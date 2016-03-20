@@ -59,7 +59,7 @@ void Plotter::moveAbsolute(int setX, int setY){
 }
 
 void Plotter::quickAbsolute(int setX, int setY){
-  x_axis.setPosition(setX);
+  x_axis.quickSetPosition(setX);
   y_axis.setPosition(setY);
   while(x_axis.getDirection() != IDLE){delayMicroseconds(1);}
 }
