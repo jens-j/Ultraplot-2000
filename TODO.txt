@@ -7,6 +7,8 @@ SMALL FEATURES
 
 - frame/limit setting to center images
 
+- keep a ~10 step safe border to allow less precise but faster drawing
+
 
 BIGGER FEATURES
 
