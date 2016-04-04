@@ -16,7 +16,9 @@ X_axis::X_axis() : sensor() {
   //loadBounds();
   bounds = {-4000, 4000};
   setPoint = 0;
+  traveled = 0;
   quick = false;
+  kickoff = false;
   direction = IDLE;
   cooldownTime = micros();
 }
@@ -28,9 +30,11 @@ void X_axis::sensorIsr(){
   
   if(sdata - sdata0 == 1 || sdata - sdata0 == -3){
     rPosition++;
+    traveled++;
   }
   else{
     rPosition--; 
+    traveled--;
   }
   
   if(rPosition < bounds.b0){
@@ -46,22 +50,36 @@ void X_axis::sensorIsr(){
 
 
 void X_axis::wdTimerIsr(){
-  panic("wdt ovf: x stuck");
+  char cBuffer[100];
+  sprintf(cBuffer, "wdt ovf (%d, %d)", setPoint - rPosition, traveled);
+  panic(cBuffer);
 }
 
 
 void X_axis::setSpeed(){
   int speed;
   int diff = abs(setPoint - rPosition);
+  int min_speed;
+  
+  // set the minimum speed
+  if(kickoff == true){
+    min_speed = X_SPEED_KICKOFF;
+    kickoff = false;
+  } 
+  else{
+    min_speed = X_SPEED_MIN;
+  }
   
   // ramp the speed based on the distance to the setpoint
   speed = X_SPEED_MIN + (int) (X_SPEED_SLOPE * diff);
   
   // constrain to the maximal speed for drawing or quick move
-  if(quick == true)
-    speed = constrain(speed, X_SPEED_MIN, X_SPEED_QUICK);
-  else
-    speed = constrain(speed, X_SPEED_MIN, X_SPEED_DRAW);
+  if(quick == true){
+    speed = constrain(speed, min_speed, X_SPEED_QUICK);
+  }
+  else{
+    speed = constrain(speed, min_speed, X_SPEED_DRAW);
+  }
   
   // write the speed to the motor 
   if(direction == LEFT and rPosition > setPoint){
@@ -108,6 +126,10 @@ int X_axis::getPosition(){
   return vPosition;
 }
 
+int X_axis::getSetPoint(){
+  return setPoint;
+}
+
 int X_axis::getRealPosition(){
   return rPosition;
 }
@@ -138,6 +160,10 @@ void X_axis::initMove(int setp){
   // enable watchdog timer interrupt
   wdt_reset();  
   WDTCSR |= (1<<WDIE); 
+ 
+  // flag the start of a new move
+  traveled = 0;
+  kickoff = true;
   
   // set direction and speed
   direction = IDLE;

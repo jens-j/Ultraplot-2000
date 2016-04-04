@@ -100,6 +100,7 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
   double phi; // angle of position
   double radius;
   double x2_d;
+  int sticky = 0;
 
   x1 = x2 = x_axis.getPosition();
   y1 = y2 = y_axis.getPosition();
@@ -131,6 +132,7 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
     
     if(direction == CCW && (rx > 0 || (rx == 0 && ry < 0))){
       //Serial.print("[CCW RH] ");
+      sticky |= 1;
       y2++;
       y_axis.stepUp();
       dy = y2 - y0;
@@ -145,6 +147,7 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
     } 
     else if(direction == CCW && (rx < 0 || (rx == 0 && ry > 0))){
       //Serial.print("[CCW LH] ");
+      sticky |= 2;
       y2--;
       y_axis.stepDown();
       dy = y2 - y0;
@@ -159,6 +162,7 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
     }
     else if(direction == CW && (rx > 0 || (rx == 0 && ry > 0))){
       //Serial.print("[CW RH] ");
+      sticky |= 4;
       y2--;
       y_axis.stepDown();
       dy = y2 - y0;
@@ -173,6 +177,7 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
     }
     else if(direction == CW && (rx < 0 || (rx == 0 && ry < 0))){
       //Serial.print("[CW LH] ");
+      sticky |= 8;
       y2++;
       y_axis.stepUp();
       dy = y2 - y0;
@@ -195,6 +200,9 @@ void Plotter::arcAbsolute(int x3, int y3, long i, long j, int direction){
       Serial.print(", ");
       Serial.println(phi, 3);
     }
+  }
+  if(sticky == 0xF || sticky == 0xE || sticky == 0xD || sticky == 0xB || sticky == 0x7){
+    panic("arc error?");
   }
 }
 

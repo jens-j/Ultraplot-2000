@@ -67,17 +67,19 @@ void timerIsrDispatcher(){
 
 
 void panic(char *s){
+  z_position_t head_pos;
   
   // disable interrupts
   WDTCSR &= ~(1<<WDIE); 
   detachInterrupt(digitalPinToInterrupt(SENSOR_X0));
   detachInterrupt(digitalPinToInterrupt(SENSOR_X1));
-  Timer1.detachInterrupt();
   
   // stop X axis motor
   digitalWrite(MOTOR_X0, LOW);
   digitalWrite(MOTOR_X1, LOW);
   
+  // retract head
+  head_pos = plotter.z_axis.getPosition();
   plotter.moveHead(Z_UP);
   
   lcd.clear();
@@ -86,7 +88,19 @@ void panic(char *s){
   lcd.setCursor(0, 2);
   lcd.print(s);
   
-  while(1){}
+  // pause
+  while(buttons.getButtonEvent() != BUTTON_MID){
+    delayMicroseconds(1);
+  }
+  
+  // restore state
+  lcd.clear();
+  plotter.moveHead(head_pos);
+  attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(SENSOR_X1), sensorIsrDispatcher, CHANGE);
+  if( plotter.x_axis.getPosition() != plotter.x_axis.getSetPoint() ){
+    plotter.x_axis.setPosition( plotter.x_axis.getSetPoint() );
+  }
 }
 
 
@@ -155,6 +169,7 @@ void calibrate(){
   ybound0 = plotter.y_axis.getPosition();
   lcd.setCursor(0, 2);
   lcd.print("set upper y bound");
+  plotter.y_axis.setPosition(1600 / Y_STEPSIZE); // move up 160 cm
   buttons.clearEvent();
   while(buttons.getButtonEvent() != BUTTON_MID){
     if(buttons.isPressed() == BUTTON_LEFT){
@@ -288,7 +303,7 @@ void executeGCode(){
       else if(c1 = strstr(cBuffer, "Z")){
         z = atof(++c1);
         if(z > 0){
-          lcd.print("move head low  ");
+          lcd.print("move head up   ");
           //Serial.println("move head mid");
           plotter.moveHead(Z_LOW);
         }
@@ -309,8 +324,8 @@ void executeGCode(){
       else if(c1 = strstr(cBuffer, "Z")){
         z = atof(++c1);
         if(z > 0){
-          lcd.print("move head mid  ");
-          //Serial.println("move head mid");
+          lcd.print("move head up   ");
+          //Serial.println("move head up");
           plotter.moveHead(Z_LOW);
         }
         else{
@@ -422,7 +437,7 @@ void setup(){
   // set up WDT interrupt
   wdt_reset();
   WDTCSR |= (1<<WDCE) | (1<<WDE); // change enable
-  WDTCSR = (1<<WDP2) | (1<<WDP1); // 1s
+  WDTCSR = (1<<WDP3) | (1<<WDP0); // timeout = 8 seconds 
   
   // attach external interrupt for the sensor
   attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);

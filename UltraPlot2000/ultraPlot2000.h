@@ -62,11 +62,12 @@
 #define Y_STEPPER_PWM     110
 #define X_SPEED_MIN       75   // PWM 
 #define X_SPEED_QUICK     110  // PWM 
-#define X_SPEED_DRAW      80   // PWM 
+#define X_SPEED_DRAW      82   // PWM 
+#define X_SPEED_KICKOFF   90   // PWM (used to overcome static friction)
 #define X_SPEED_SLOPE     0.25 // PWM / distance 
 #define X_COOLDOWN        2000 // in us
-#define Y_COOLDOWN_MIN    1000 // in us
-#define Y_COOLDOWN_MAX    2000 // in us 
+#define Y_COOLDOWN_MIN    1500 // in us (1200)
+#define Y_COOLDOWN_MAX    3000 // in us (2400)
 #define Y_COOLDOWN_RAMP   200  // in steps
 #define Z_COOLDOWN_MIN 	  800  // in us
 #define Z_COOLDOWN_MAX 	  3000 // in us
