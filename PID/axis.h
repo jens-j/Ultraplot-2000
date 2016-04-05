@@ -1,12 +1,13 @@
 #ifndef axis_h
 #define axis_h
 
-
+#include "ultraPlot2000.h"
 #include "sensor.h"
 #include "stepper.h"
 #include "EEPROMlib.h"
 
-#define LOGSIZE 1600
+
+#define LOGSIZE 1000
 
 // positions of the plotter head 
 enum z_position_t  {Z_UP = 0, Z_DOWN = 40, Z_MID = 30, Z_LOW = 36, Z_UNKNOWN = 255};
@@ -21,19 +22,23 @@ typedef struct bounds_s{
 class X_axis{
   
 private:
+  double pidOutput; // PWM
+  int previousError;
+  long cumulativeError;
+  unsigned long pidTime;
   int logCount;
-  unsigned long logTime;
-  //int positionLog[LOGSIZE]; // in real coordinates
-  int speedLog[LOGSIZE];    // in mm/s
-  int sdata0;
-  int vPosition;
-  int rPosition;
-  int previousRPosition;
+  unsigned char pidLog[LOGSIZE]; // in PWM
+  unsigned char vLog[LOGSIZE]; // speed setpoint in mm/s
+  unsigned char rLog[LOGSIZE]; // speed in mm/s
+  int sdata0;      // previous sensor data
+  int vPosition;   // virtual postition, interface to higher levels
+  int rPosition;   // real position in physical steps
+  int previousRPosition; // previous real position, used for speed calsulation
   int setPoint;    // in real coordinates
   int traveled;    // number of steps taken in current move
   bounds_t bounds; // in real coordinates
   boolean quick;   // flag to enable quick move
-  boolean kickoff; // flag to ensure overcoming the static friction
+  boolean kickoff; // flags start of move, used to overcome static friction
   x_direction_t direction;
   unsigned long cooldownTime;
   Sensor sensor;

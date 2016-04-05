@@ -455,9 +455,9 @@ void setup(){
 
 void loop(){  
 
-  plotter.quickAbsolute((int) (((double) -1500) * XY_SCALE), 0);
+  plotter.moveAbsolute((int) (((double) LOGSIZE-50) * XY_SCALE), 0);
   plotter.x_axis.uploadLog();
-  plotter.quickAbsolute(0, 0);
+  plotter.moveAbsolute(0, 0);
   while(1){
     delayMicroseconds(1);
   }
