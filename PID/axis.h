@@ -7,7 +7,8 @@
 #include "EEPROMlib.h"
 
 
-#define LOGSIZE 1000
+#define LOGSIZE  3000
+#define FILTER_N 1
 
 // positions of the plotter head 
 enum z_position_t  {Z_UP = 0, Z_DOWN = 40, Z_MID = 30, Z_LOW = 36, Z_UNKNOWN = 255};
@@ -22,13 +23,16 @@ typedef struct bounds_s{
 class X_axis{
   
 private:
+  double filterDelay[FILTER_N];
+  int filterCount;
+  int filterIndex;
   double pidOutput; // PWM
-  int previousError;
-  long cumulativeError;
+  double previousError;
+  double cumulativeError;
   unsigned long pidTime;
   int logCount;
-  unsigned char pidLog[LOGSIZE]; // in PWM
-  unsigned char vLog[LOGSIZE]; // speed setpoint in mm/s
+  //unsigned char pidLog[LOGSIZE]; // in PWM
+  //unsigned char vLog[LOGSIZE]; // speed setpoint in mm/s
   unsigned char rLog[LOGSIZE]; // speed in mm/s
   int sdata0;      // previous sensor data
   int vPosition;   // virtual postition, interface to higher levels

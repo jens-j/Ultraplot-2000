@@ -12,11 +12,12 @@
 X_axis::X_axis() : sensor() {
   char buffer[20];
   int i;
+  filterCount = 0;
   logCount = 0;
   for(i = 0; i < LOGSIZE; i++){
     rLog[i] = 0;
-    vLog[i] = 0;
-    pidLog[i] = 0;
+//    vLog[i] = 0;
+//    //pidLog[i] = 0;
   }
   //logTime = micros();
   pidTime = micros();
@@ -70,16 +71,18 @@ void X_axis::wdTimerIsr(){
 
 
 void X_axis::setSpeed(){
-  int v; // speed setpoint
-  int r; // actual speed
-  int e; // error 
+  int i;
+  double v; // speed setpoint
+  double r; // actual speed
+  double f_r; // filtered actual speed
+  double e; // error 
   double d_e; // differential error
   double d_v;; // setpoint 
    
   int dist = abs(setPoint - rPosition);
   
   // ramp the speed setpoint based on the distance to the setpoint
-  v = X_SPEED_MIN + (int) (X_SPEED_SLOPE * dist);
+  v = X_SPEED_MIN + (X_SPEED_SLOPE * dist);
   
   // constrain to the maximal speed for drawing or quick move
   if(quick == true){
@@ -88,6 +91,25 @@ void X_axis::setSpeed(){
   else{
     v = constrain(v, X_SPEED_MIN, X_SPEED_DRAW);
   }
+  
+  // calculate the actual speed (mm/s)
+  r = (X_STEPSIZE * 1E6) / ((double) (micros() - pidTime));
+  pidTime = micros();
+    
+  // filter
+  filterDelay[filterIndex] = r;
+  if(++filterIndex == FILTER_N){
+    filterIndex = 0;
+  }
+  if(filterCount < FILTER_N){
+    filterCount++;    
+  }
+  
+  f_r = 0.0;
+  for(i = 0; i < filterCount; i++){
+    f_r += filterDelay[i];
+  }
+  f_r /= filterCount;
   
   // set a initial PWM value in the first cycle of a new move
   if(kickoff == true){
@@ -98,13 +120,9 @@ void X_axis::setSpeed(){
     r = v;
   } 
   else{
-   
-    // calculate the actual speed (mm/s)
-    r = (X_STEPSIZE * 1E6) / ((double) (micros() - pidTime));
-    pidTime = micros();
-    
+      
     // calculate pwm change 
-    e = v - r;
+    e = v - f_r;
     d_e = e - previousError;
     previousError = e;
     cumulativeError += e;
@@ -116,9 +134,9 @@ void X_axis::setSpeed(){
   pidOutput = constrain(pidOutput, X_PWM_MIN, X_PWM_MAX);
   
   // logging 
-  rLog[logCount] = r;
-  vLog[logCount] = v;
-  pidLog[logCount] = pidOutput;
+  rLog[logCount] = f_r;
+  //vLog[logCount] = v;
+  //pidLog[logCount] = pidOutput;
   if(++logCount == LOGSIZE) 
     logCount = 0;
   
@@ -205,6 +223,8 @@ void X_axis::initMove(int setp){
   // flag the start of a new move
   traveled = 0;
   kickoff = true;
+  filterCount = 0;
+  filterIndex = 0;
   
   // set direction and speed
   direction = IDLE;
@@ -239,14 +259,10 @@ x_direction_t X_axis::getDirection(){
 void X_axis::uploadLog(){
   int i;
   
-  for(i = 0; i < LOGSIZE; i++){
+  for(i = 0; i < LOGSIZE; i++){   
     Serial.print(i);
     Serial.print(",");
-    Serial.print((unsigned int) rLog[i]);
-    Serial.print(",");
-    Serial.print((unsigned int) vLog[i]);
-    Serial.print(",");
-    Serial.println((unsigned int) pidLog[i]);
+    Serial.println((unsigned int) rLog[i]);
   }
 }
 

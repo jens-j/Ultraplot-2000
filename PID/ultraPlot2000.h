@@ -74,9 +74,10 @@
 #define Z_COOLDOWN_MIN 	  800  // in us
 #define Z_COOLDOWN_MAX 	  3000 // in us
 #define Z_COOLDOWN_RAMP   40   // in steps
-#define PID_P             0.2
-#define PID_I             0
-#define PID_D             1  
+#define PID_P             0.2 // 0.2
+#define PID_I             0.001
+#define PID_D             1 // 1  
+
 
 
 /*********************************************************/

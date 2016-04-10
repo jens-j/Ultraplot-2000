@@ -455,7 +455,7 @@ void setup(){
 
 void loop(){  
 
-  plotter.moveAbsolute((int) (((double) LOGSIZE-50) * XY_SCALE), 0);
+  plotter.moveAbsolute((int) (((double) LOGSIZE-100) * XY_SCALE), 0);
   plotter.x_axis.uploadLog();
   plotter.moveAbsolute(0, 0);
   while(1){
