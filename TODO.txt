@@ -9,6 +9,12 @@ SMALL FEATURES
 
 - keep a ~10 step safe border to allow less precise but faster drawing
 
+- create a save/restore to EEPROM menu item
+
+- direct movement controls 
+
+- LCD text during y calibration (wait...)
+
 
 BIGGER FEATURES
 

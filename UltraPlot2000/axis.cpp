@@ -10,8 +10,20 @@
 /*	X axis 			    
 /*********************************************************/
 X_axis::X_axis() : sensor() {
+  char buffer[20];
+  int i;
+  //filterCount = 0;
+  logCount = 0;
+//  for(i = 0; i < LOGSIZE; i++){
+//    rLog[i] = 0;
+//    vLog[i] = 0;
+//    //pidLog[i] = 0;
+//  }
+  //logTime = micros();
+  pidTime = micros();
   sdata0 = 0;
-  loadPosition();
+  rPosition = 0;
+  //loadPosition();
   vPosition = (int) (rPosition * XY_SCALE);
   //loadBounds();
   bounds = {-4000, 4000};
@@ -24,7 +36,7 @@ X_axis::X_axis() : sensor() {
 }
 
 void X_axis::sensorIsr(){
-  
+  char buffer[20];
   wdt_reset();
   int sdata = sensor.decodeSensor();
   
@@ -38,14 +50,18 @@ void X_axis::sensorIsr(){
   }
   
   if(rPosition < bounds.b0){
-    panic("x < SW bound");
+    sprintf(buffer, "x bound %d<%d", rPosition, bounds.b0);
+    panic(buffer);
   }
   if(rPosition > bounds.b1){
-    panic("x > SW bound");
+    sprintf(buffer, "x bound %d>%d", rPosition, bounds.b1);
+    panic(buffer);
   }  
- 
-  setSpeed();
+  
   sdata0 = sdata;  
+  if(direction != IDLE){
+    setSpeed();
+  }
 }
 
 
@@ -57,54 +73,96 @@ void X_axis::wdTimerIsr(){
 
 
 void X_axis::setSpeed(){
-  int speed;
-  int diff = abs(setPoint - rPosition);
-  int min_speed;
+  int i;
+  double v; // speed setpoint
+  double r; // actual speed
+  //double f_r; // filtered actual speed
+  double e; // error 
+  double d_e; // differential error
+  double d_v;; // setpoint 
+   
+  int dist = abs(setPoint - rPosition);
   
-  // set the minimum speed
-  if(kickoff == true){
-    min_speed = X_SPEED_KICKOFF;
-    kickoff = false;
-  } 
-  else{
-    min_speed = X_SPEED_MIN;
-  }
-  
-  // ramp the speed based on the distance to the setpoint
-  speed = X_SPEED_MIN + (int) (X_SPEED_SLOPE * diff);
+  // ramp the speed setpoint based on the distance to the setpoint
+  v = X_SPEED_MIN + (X_SPEED_SLOPE * dist);
   
   // constrain to the maximal speed for drawing or quick move
   if(quick == true){
-    speed = constrain(speed, min_speed, X_SPEED_QUICK);
+    v = constrain(v, X_SPEED_MIN, X_SPEED_QUICK);
   }
   else{
-    speed = constrain(speed, min_speed, X_SPEED_DRAW);
+    v = constrain(v, X_SPEED_MIN, X_SPEED_DRAW);
   }
   
-  // write the speed to the motor 
-  if(direction == LEFT and rPosition > setPoint){
-    analogWrite(MOTOR_X0, speed);
+  // calculate the actual speed (mm/s)
+  r = (X_STEPSIZE * 1E6) / ((double) (micros() - pidTime));
+  pidTime = micros();
+    
+  // filter
+  //filterDelay[filterIndex] = r;
+  //if(++filterIndex == FILTER_N){
+  //  filterIndex = 0;
+  //}
+  //if(filterCount < FILTER_N){
+  //  filterCount++;    
+  //}
+  
+  //f_r = 0.0;
+  //for(i = 0; i < filterCount; i++){
+  //  f_r += filterDelay[i];
+  //}
+  //f_r /= filterCount;
+  
+  // set a initial PWM value in the first cycle of a new move
+  if(kickoff == true){
+    previousError = 0;
+    cumulativeError = 0;
+    pidOutput = X_PWM_INIT;
+    kickoff = false;
+    r = v;
+  } 
+  else{
+      
+    // calculate pwm change 
+    e = v - r;
+    d_e = e - previousError;
+    previousError = e;
+    cumulativeError += e;
+    d_v = PID_P * e + PID_D * d_e + PID_I * cumulativeError;
+    pidOutput += d_v;
   }
-  else if(direction == RIGHT and rPosition < setPoint){
-    analogWrite(MOTOR_X1, speed);
+  
+  // constrain PWM output
+  pidOutput = constrain(pidOutput, X_PWM_MIN, X_PWM_MAX);
+  
+  // logging 
+  //rLog[logCount] = f_r;
+  //vLog[logCount] = v;
+  //pidLog[logCount] = pidOutput;
+  //if(++logCount == LOGSIZE) 
+  //  logCount = 0;
+  
+  // write the speed to the motor 
+  if(direction == LEFT && rPosition > setPoint){
+    analogWrite(MOTOR_X0, pidOutput);
+  }
+  else if(direction == RIGHT && rPosition < setPoint){
+    analogWrite(MOTOR_X1, pidOutput);
   }
   else{ // end position reached  
   
     // disable wdt interrupt
     WDTCSR &= ~(1<<WDIE); 
     
-    // step the motor
+    // stop the motor
     analogWrite(MOTOR_X0, 0);
     analogWrite(MOTOR_X1, 0);
     quick = false;
     
-    if(direction == IDLE){
-      //Serial.println("overshot");
-    }
-    else{
-      cooldownTime = micros();
-      direction = IDLE;
-    }
+    //Serial.print("end: ");
+    //Serial.println(rPosition);
+    cooldownTime = micros();
+    direction = IDLE;
   }
 }
 
@@ -159,11 +217,13 @@ void X_axis::initMove(int setp){
   
   // enable watchdog timer interrupt
   wdt_reset();  
-  WDTCSR |= (1<<WDIE); 
+  //WDTCSR |= (1<<WDIE); 
  
   // flag the start of a new move
   traveled = 0;
   kickoff = true;
+  //filterCount = 0;
+  //filterIndex = 0;
   
   // set direction and speed
   direction = IDLE;
@@ -195,6 +255,16 @@ x_direction_t X_axis::getDirection(){
   return direction; 
 }
 
+//void X_axis::uploadLog(){
+//  int i;
+//  
+//  for(i = 0; i < LOGSIZE; i++){   
+//    Serial.print(i);
+//    Serial.print(",");
+//    Serial.println((unsigned int) rLog[i]);
+//  }
+//}
+
 /*********************************************************/
 /*	Y axis 			    
 /*********************************************************/
@@ -213,7 +283,7 @@ void Y_axis::stepDown(){
 
 void Y_axis::stepDown(int cooldown){
   if(--position < bounds.b0){
-    panic("y < SW bound"); 
+    panic("y < SW bound %d %d"); 
   }
   if(digitalRead(BUTTON_Y0) == LOW){
     panic("y < HW bound");

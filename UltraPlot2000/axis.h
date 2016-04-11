@@ -1,11 +1,14 @@
 #ifndef axis_h
 #define axis_h
 
-
+#include "ultraPlot2000.h"
 #include "sensor.h"
 #include "stepper.h"
 #include "EEPROMlib.h"
 
+
+#define LOGSIZE  3000
+#define FILTER_N 1
 
 // positions of the plotter head 
 enum z_position_t  {Z_UP = 0, Z_DOWN = 40, Z_MID = 30, Z_LOW = 36, Z_UNKNOWN = 255};
@@ -18,14 +21,28 @@ typedef struct bounds_s{
 }bounds_t;
 
 class X_axis{
-  int sdata0;
-  int vPosition;
-  int rPosition;
+  
+private:
+  //double filterDelay[FILTER_N];
+  //int filterCount;
+  //int filterIndex;
+  double pidOutput; // PWM
+  double previousError;
+  double cumulativeError;
+  unsigned long pidTime;
+  int logCount;
+  //unsigned char pidLog[LOGSIZE]; // in PWM
+  //unsigned char vLog[LOGSIZE]; // speed setpoint in mm/s
+  //unsigned char rLog[LOGSIZE]; // speed in mm/s
+  int sdata0;      // previous sensor data
+  int vPosition;   // virtual postition, interface to higher levels
+  int rPosition;   // real position in physical steps
+  int previousRPosition; // previous real position, used for speed calsulation
   int setPoint;    // in real coordinates
   int traveled;    // number of steps taken in current move
   bounds_t bounds; // in real coordinates
   boolean quick;   // flag to enable quick move
-  boolean kickoff; // flag to ensure overcoming the static friction
+  boolean kickoff; // flags start of move, used to overcome static friction
   x_direction_t direction;
   unsigned long cooldownTime;
   Sensor sensor;
@@ -54,10 +71,13 @@ public:
   void storeBounds() {romWriteInt(ROM_X_LBOUND, bounds.b0); 
                       romWriteInt(ROM_X_RBOUND, bounds.b1); 
                      };
+  void uploadLog();
 };
 
 
 class Y_axis{
+  
+private:
   int position; 
   bounds_t bounds;
   unsigned long cooldownTime;
@@ -65,6 +85,7 @@ class Y_axis{
   void step_ISR();
   void stepUp(int); // step with specific cooldown
   void stepDown(int);
+  
 public:
   Y_axis();
   void stepUp();
@@ -83,9 +104,12 @@ public:
 };
 
 class Z_axis{
+  
+private:
   z_position_t position;
   Stepper stepper;
   void moveRelative(int);
+  
 public:
   Z_axis();
   z_position_t getPosition();

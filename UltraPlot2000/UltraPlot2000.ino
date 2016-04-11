@@ -89,6 +89,7 @@ void panic(char *s){
   lcd.print(s);
   
   // pause
+  void clearEvent();
   while(buttons.getButtonEvent() != BUTTON_MID){
     delayMicroseconds(1);
   }
@@ -143,7 +144,10 @@ void calibrate(){
   xrange = xbound1 - xbound0;
   plotter.x_axis.setBounds({0, xrange - 1});
   plotter.x_axis.initPosition(xrange - 1); 
-  plotter.x_axis.quickSetPosition(xrange * XY_SCALE / 2);
+  //Serial.println(xrange / 2);
+  plotter.quickAbsolute( (int) ((xrange * XY_SCALE) / 2), plotter.y_axis.getPosition() );
+  //delay(3);
+  //Serial.println(plotter.x_axis.getRealPosition());
   
   
   // Y-axis
@@ -169,7 +173,7 @@ void calibrate(){
   ybound0 = plotter.y_axis.getPosition();
   lcd.setCursor(0, 2);
   lcd.print("set upper y bound");
-  plotter.y_axis.setPosition(1600 / Y_STEPSIZE); // move up 160 cm
+  plotter.y_axis.setPosition( plotter.x_axis.getPosition() + (160 / Y_STEPSIZE) ); // move up 16 cm
   buttons.clearEvent();
   while(buttons.getButtonEvent() != BUTTON_MID){
     if(buttons.isPressed() == BUTTON_LEFT){
