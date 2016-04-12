@@ -28,7 +28,6 @@ private:
   //int filterIndex;
   double pidOutput; // PWM
   double previousError;
-  double cumulativeError;
   unsigned long pidTime;
   int logCount;
   //unsigned char pidLog[LOGSIZE]; // in PWM
@@ -72,6 +71,8 @@ public:
                       romWriteInt(ROM_X_RBOUND, bounds.b1); 
                      };
   void uploadLog();
+  
+  int debugCount;
 };
 
 

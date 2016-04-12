@@ -22,26 +22,26 @@ void Buttons::isr(){
       buttonEvent = BUTTON_UP;
     }
   }
-  if(digitalRead(BUTTON_DOWN) == LOW){
+  else if(digitalRead(BUTTON_DOWN) == LOW){
     state |= 0x02;
     lastPressed = BUTTON_DOWN;
     if(!(state0 & 0x02)){
       buttonEvent = BUTTON_DOWN;
     }
   }
-  if(digitalRead(BUTTON_LEFT) == LOW){
+  else if(digitalRead(BUTTON_LEFT) == LOW){
     state |= 0x04;
     lastPressed = BUTTON_LEFT;
     if(!(state0 & 0x04))
       buttonEvent = BUTTON_LEFT;
   }
-  if(digitalRead(BUTTON_RIGHT) == LOW){
+  else if(digitalRead(BUTTON_RIGHT) == LOW){
     state |= 0x08;
     lastPressed = BUTTON_RIGHT;
     if(!(state0 & 0x08))
       buttonEvent = BUTTON_RIGHT;
   }
-  if(digitalRead(BUTTON_MID) == LOW){
+  else if(digitalRead(BUTTON_MID) == LOW){
     state |= 0x10;
     lastPressed = BUTTON_MID;
     if(!(state0 & 0x10))

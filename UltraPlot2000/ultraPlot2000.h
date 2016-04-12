@@ -64,9 +64,9 @@
 #define X_PWM_MIN         60
 #define X_PWM_MAX         130
 #define X_SPEED_MIN       5    // mm/s 
-#define X_SPEED_QUICK     120  // mm/s 
+#define X_SPEED_QUICK     180  // mm/s 
 #define X_SPEED_DRAW      20   // mm/s 
-#define X_SPEED_SLOPE     0.5  // mm/s/step 
+#define X_SPEED_SLOPE     0.40  // mm/s/step 
 #define X_COOLDOWN        2000 // in us
 #define Y_COOLDOWN_MIN    1500 // in us (1200)
 #define Y_COOLDOWN_MAX    3000 // in us (2400)
@@ -75,7 +75,6 @@
 #define Z_COOLDOWN_MAX 	  3000 // in us
 #define Z_COOLDOWN_RAMP   40   // in steps
 #define PID_P             0.2 // 0.2
-#define PID_I             0.001
 #define PID_D             1 // 1  
 
 

@@ -33,10 +33,12 @@ X_axis::X_axis() : sensor() {
   kickoff = false;
   direction = IDLE;
   cooldownTime = micros();
+  debugCount = 0;
 }
 
 void X_axis::sensorIsr(){
   char buffer[20];
+  //unsigned long t = micros();
   wdt_reset();
   int sdata = sensor.decodeSensor();
   
@@ -62,11 +64,18 @@ void X_axis::sensorIsr(){
   if(direction != IDLE){
     setSpeed();
   }
+  
+  //sprintf(buffer, "isr: %d us", micros() - t);
+  //panic(buffer);
+  
+  if( EIFR & (1<<2) != 0 || EIFR & (1<<3) != 0 ){
+    debugCount++;
+  }
 }
 
 
 void X_axis::wdTimerIsr(){
-  char cBuffer[100];
+  char cBuffer[20];
   sprintf(cBuffer, "wdt ovf (%d, %d)", setPoint - rPosition, traveled);
   panic(cBuffer);
 }
@@ -116,7 +125,6 @@ void X_axis::setSpeed(){
   // set a initial PWM value in the first cycle of a new move
   if(kickoff == true){
     previousError = 0;
-    cumulativeError = 0;
     pidOutput = X_PWM_INIT;
     kickoff = false;
     r = v;
@@ -127,8 +135,7 @@ void X_axis::setSpeed(){
     e = v - r;
     d_e = e - previousError;
     previousError = e;
-    cumulativeError += e;
-    d_v = PID_P * e + PID_D * d_e + PID_I * cumulativeError;
+    d_v = PID_P * e + PID_D * d_e;
     pidOutput += d_v;
   }
   
