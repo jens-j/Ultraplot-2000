@@ -1,36 +1,17 @@
 BUGS
-
+- wtf.log
+- no wdt
 
 SMALL FEATURES
-
-- y ramp during calibration
-
 - frame/limit setting to center images
-
 - keep a ~10 step safe border to allow less precise but faster drawing
-
 - create a save/restore to EEPROM menu item
-
 - direct movement controls 
-
 - LCD text during y calibration (wait...)
 
-
 BIGGER FEATURES
-
-- scrolling menus 
-
 - brown-out save routine
 
-- PID control to get consistent X speeds
-
-
 IMPLEMENTED BUT NOT COMLETELY TESTED:
-
 - EEPROM storage for calibration and position
-
-- parametric X ramp
-
-- faster x speed for quickmove
-
 - X axis watchdog timer

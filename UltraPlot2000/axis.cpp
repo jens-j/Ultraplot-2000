@@ -23,9 +23,7 @@ X_axis::X_axis() : sensor() {
   pidTime = micros();
   sdata0 = 0;
   rPosition = 0;
-  //loadPosition();
   vPosition = (int) (rPosition * XY_SCALE);
-  //loadBounds();
   bounds = {-4000, 4000};
   setPoint = 0;
   traveled = 0;
@@ -278,8 +276,6 @@ x_direction_t X_axis::getDirection(){
 Y_axis::Y_axis() : 
 stepper(MOTOR_Y0, MOTOR_Y1, MOTOR_Y2, MOTOR_Y3, Y_STEPPER_PWM)
 {
-  loadPosition();
-  //loadBounds();
   bounds = {-6000, 6000};
   cooldownTime = micros();
 }
@@ -368,7 +364,6 @@ bounds_t Y_axis::getBounds(){
 Z_axis::Z_axis() : 
 stepper(MOTOR_Z0, MOTOR_Z1, MOTOR_Z2, MOTOR_Z3, 255) 
 {
-  //loadPosition(); 
   position = Z_UNKNOWN;
 }
 

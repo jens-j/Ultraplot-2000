@@ -9,21 +9,26 @@
 #include "shapes.h"
 
 
-const int  N_MENU_ENTRIES[2] = {4, 4};
+const int  N_MENU_ENTRIES[2] = {7, 4};
 
-const char MAIN_MENU_TEXT[4][20] = {"Toggle head",
-                                    "Calibrate",  
-                                    "GCode", 
-                                    "Draw"};
-const char DRAW_MENU_TEXT[4][20] = {"Sinc", 
-                                    "Circle", 
-                                    "Square",
-                                    "Back"};
+const char MAIN_MENU_TEXT[7][20] = {"Toggle head        ",
+                                    "Save State         ",
+                                    "Restore State      ",
+                                    "Movement Control   ",
+                                    "Calibrate          ",  
+                                    "GCode              ", 
+                                    "Draw               "};
+                                    
+const char DRAW_MENU_TEXT[4][20] = {"Sinc               ", 
+                                    "Circle             ", 
+                                    "Square             ",
+                                    "Back               "};
 
 char lcdBuffer[20];
 char cBuffer[100];
 menuSel_t menuSel = MENU_MAIN;
 int menuPosition = 0;
+int menuWindowPosition = 0;
 
 
 Plotter plotter = Plotter();
@@ -104,6 +109,29 @@ void panic(char *s){
   }
 }
 
+void saveState(){
+  int address = 0;
+  
+  romWriteInt( plotter.x_axis.getRealPosition(), address++ );
+  romWriteInt( plotter.x_axis.getBounds().b0, address++ );
+  romWriteInt( plotter.x_axis.getBounds().b1, address++ );
+  romWriteInt( plotter.y_axis.getPosition(), address++ );
+  romWriteInt( plotter.y_axis.getBounds().b0, address++ );
+  romWriteInt( plotter.y_axis.getBounds().b1, address++ );
+  romWriteInt( (int) plotter.z_axis.getPosition(), address++ );
+}
+
+void restoreState(){
+  int address = 0;
+ 
+  plotter.x_axis.initPosition( romReadInt(address++) );
+  plotter.x_axis.setBounds( {romReadInt(address), romReadInt(address+1)} );
+  address += 2;
+  plotter.y_axis.initPosition( romReadInt(address++) );
+  plotter.y_axis.setBounds( {romReadInt(address), romReadInt(address+1)} );
+  address += 2;
+  plotter.z_axis.initPosition( (z_position_t) romReadInt(address++) );
+}
 
 void calibrate(){
   int xbound0, xbound1;
@@ -227,7 +255,7 @@ void calibrate(){
 
 
 void printMenu(){
-  int i;
+  int i, j;
   const char (*menu)[20];
   
   if(menuSel == MENU_MAIN){
@@ -238,15 +266,16 @@ void printMenu(){
   }
   
   //lcd.clear();
-  for(i = 0; i < N_MENU_ENTRIES[menuSel]; i++){
+  for(i = 0; i < 4; i++){
     lcd.setCursor(0, i);
-    if(i == menuPosition){
+    j = i + menuWindowPosition;
+    if(j == menuPosition){
       lcd.print(">");
-      lcd.print(menu[i]);
+      lcd.print(menu[j]);
     }
     else{
       lcd.print(" ");
-      lcd.print(menu[i]);
+      lcd.print(menu[j]);
     }
   } 
 }
@@ -467,17 +496,27 @@ void loop(){
 
   command = buttons.getButtonEvent();
   if(command == BUTTON_DOWN){
-    menuPosition = (menuPosition == N_MENU_ENTRIES[menuSel]-1) ? 0 : menuPosition+1;
+    if( menuPosition < N_MENU_ENTRIES[menuSel]-1 ){
+      menuPosition++;
+    }
+    if( menuPosition > menuWindowPosition + 3 ){
+      menuWindowPosition++;
+    }
   }
   if(command == BUTTON_UP){
-    menuPosition = (menuPosition == 0) ? N_MENU_ENTRIES[menuSel]-1 : menuPosition-1;
+    if( menuPosition > 0 ){
+      menuPosition--;
+    }
+    if( menuPosition < menuWindowPosition ){
+      menuWindowPosition--;
+    }
   }
   if(command == BUTTON_MID){   
     switch(menuSel){
       
       case MENU_MAIN:
         switch(menuPosition){
-          case 0:
+          case 0: // TOGGLE HEAD
             if(plotter.z_axis.getPosition() == Z_UP){
               plotter.moveHead(Z_DOWN);
             }
@@ -485,19 +524,34 @@ void loop(){
               plotter.moveHead(Z_UP);
             }
             break;
-          case 1:
+            
+          case 1: // SAVE STATE
+            saveState();
+            break;
+            
+          case 2: // RESTORE STATE
+            restoreState();
+            break;
+          
+          case 3: // MOVEMENT CONTROL         
+            break;
+          
+          case 4: // CALIBRATE
             calibrate();
             break;
-          case 2:
+            
+          case 5: // GCODE
             executeGCode();
             break;
-          case 3:
+            
+          case 6: // DRAW
             menuSel = MENU_DRAW;
             menuPosition = 0;
-            lcd.clear();
-        }
-        break;
-        
+            menuWindowPosition = 0;
+            //lcd.clear();
+            break;
+        } 
+      break;
         
       case MENU_DRAW:
         switch(menuPosition){
@@ -513,7 +567,9 @@ void loop(){
           case 3:
             menuSel = MENU_MAIN;
             menuPosition = 0;
-            lcd.clear();
+            menuWindowPosition = 0;
+            //lcd.clear();
+            break;
         }
         break;
     }
