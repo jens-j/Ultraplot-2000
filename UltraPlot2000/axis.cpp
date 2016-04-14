@@ -50,6 +50,7 @@ void X_axis::sensorIsr(){
   char buffer[20];
   //unsigned long t = micros();
   wdt_reset();
+  wdtCount = 0;
   int sdata = sensor.decodeSensor();
   
   if(sdata - sdata0 == 1 || sdata - sdata0 == -3){
@@ -89,8 +90,25 @@ void X_axis::sensorIsr(){
 
 void X_axis::wdTimerIsr(){
   char cBuffer[20];
-  sprintf(cBuffer, "wdt ovf (%d, %d)", setPoint - rPosition, traveled);
-  panic(cBuffer);
+  
+  wdtCount++;
+  stallCount++;
+  
+  if( wdtCount == X_WDT_SNOOZE ){
+     sprintf(cBuffer, "wdt ovf (%d, %d)", setPoint - rPosition, traveled);
+     panic(cBuffer);
+  }
+  else{
+    if( direction == LEFT ){
+      analogWrite(MOTOR_X0, (int) pidOutput + wdtCount);
+    } 
+    else if( direction == RIGHT ){
+      analogWrite(MOTOR_X1, (int) pidOutput + wdtCount);
+    }
+    else{
+      panic("wut?"); 
+    }
+  }
 }
 
 
@@ -234,11 +252,7 @@ void X_axis::initMove(int setp){
   
   // convert virtual to physical coordinates
   setPoint = (int) (setp * YX_SCALE);  
-  
-  // enable watchdog timer interrupt
-  wdt_reset();  
-  //WDTCSR |= (1<<WDIE); 
- 
+   
   // flag the start of a new move
   traveled = 0;
   kickoff = true;
@@ -255,6 +269,12 @@ void X_axis::initMove(int setp){
     direction = RIGHT;
     setSpeed(); 
   }  
+  
+  // enable watchdog timer interrupt
+  if( direction != IDLE ){
+    wdt_reset();  
+    WDTCSR |= (1<<WDIE); 
+  }
 }
 
 

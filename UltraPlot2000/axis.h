@@ -23,9 +23,10 @@ typedef struct bounds_s{
 class X_axis{
   
 private:
-  int overshootCount; // diagnostics 
-  int stallCount;     // 
-  int retriggerCount; // 
+  int overshootCount; // }
+  int stallCount;     // }diagnostics 
+  int retriggerCount; // }
+  int wdtCount;       // counts the number of consecutive wdt interrupts
   //double filterDelay[FILTER_N];
   //int filterCount;
   //int filterIndex;

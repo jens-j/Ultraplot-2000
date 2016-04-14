@@ -126,7 +126,7 @@ void panic(char *s){
   
   // pause
   buttons.clearEvent();
-  while(buttons.getButtonEvent() != BUTTON_MID){
+  while( buttons.getButtonEvent() != BUTTON_MID ){
     delayMicroseconds(1);
   }
   
@@ -500,7 +500,7 @@ void setup(){
   // set up WDT interrupt
   wdt_reset();
   WDTCSR |= (1<<WDCE) | (1<<WDE); // change enable
-  WDTCSR = (1<<WDP3) | (1<<WDP0); // timeout = 8 seconds 
+  WDTCSR = (1<<WDP1) | (1<<WDP0); // timeout = 125 ms 
   
   // attach external interrupt for the sensor
   attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);

@@ -67,6 +67,7 @@
 #define X_SPEED_QUICK     180  // mm/s 
 #define X_SPEED_DRAW      20   // mm/s 
 #define X_SPEED_SLOPE     0.40 // mm/s/step 
+#define X_WDT_SNOOZE      20   // the number of wdt interrupts that lead to a panic (each interrupt increments the PWM value)
 #define X_COOLDOWN        2000 // in us
 #define Y_COOLDOWN_MIN    1500 // in us (1200)
 #define Y_COOLDOWN_MAX    3000 // in us (2400)
