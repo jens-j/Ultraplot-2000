@@ -23,6 +23,9 @@ typedef struct bounds_s{
 class X_axis{
   
 private:
+  int overshootCount; // diagnostics 
+  int stallCount;     // 
+  int retriggerCount; // 
   //double filterDelay[FILTER_N];
   //int filterCount;
   //int filterIndex;
@@ -65,8 +68,8 @@ public:
   void stop();
   x_direction_t getDirection();
   void uploadLog();
-  
-  int debugCount;
+  void resetDiagnostics(); // reset the diagnostics counters
+  void getDiagnostics(int*);   // returns an array of the diagnostics values
 };
 
 

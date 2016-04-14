@@ -9,9 +9,10 @@
 #include "shapes.h"
 
 
-const int  N_MENU_ENTRIES[2] = {7, 4};
+const int  N_MENU_ENTRIES[2] = {8, 4};
 
-const char MAIN_MENU_TEXT[7][20] = {"Toggle head        ",
+const char MAIN_MENU_TEXT[8][20] = {"Toggle head        ",
+                                    "Print Diagnostics  ",
                                     "Save State         ",
                                     "Restore State      ",
                                     "Movement Control   ",
@@ -71,6 +72,36 @@ void timerIsrDispatcher(){
 }
 
 
+void printDiagnostics(){
+  int diag[3];
+  char buffer[20];
+  
+  plotter.x_axis.getDiagnostics(&diag[0]);
+  
+  lcd.clear();
+  
+  lcd.setCursor(0, 0);
+  lcd.print("[Diagnostics]");
+  
+  lcd.setCursor(0, 1);
+  sprintf(buffer, "overshoot = %d", diag[0]);
+  lcd.print(buffer);
+  
+  lcd.setCursor(0, 2);
+  sprintf(buffer, "stall     = %d", diag[1]);
+  lcd.print(buffer);
+  
+  lcd.setCursor(0, 3);
+  sprintf(buffer, "retrigger = %d", diag[2]);
+  lcd.print(buffer);
+  
+  buttons.clearEvent();
+  while( buttons.getButtonEvent() != BUTTON_MID ){
+    delayMicroseconds(1); 
+  }
+  plotter.x_axis.resetDiagnostics();
+}
+
 void panic(char *s){
   z_position_t head_pos;
   
@@ -98,6 +129,8 @@ void panic(char *s){
   while(buttons.getButtonEvent() != BUTTON_MID){
     delayMicroseconds(1);
   }
+  
+  printDiagnostics(); // this blocks until a buttons is pressed
   
   // restore state
   lcd.clear();
@@ -173,15 +206,8 @@ void calibrate(){
   plotter.x_axis.setBounds({0, xrange - 1});
   plotter.x_axis.initPosition(xrange - 1); 
   
-  Serial.println(plotter.x_axis.debugCount);
-  
-  //Serial.println(xrange / 2);
   plotter.quickAbsolute( (int) ((xrange * XY_SCALE) / 2), plotter.y_axis.getPosition() );
-  //delay(3);
-  //Serial.println(plotter.x_axis.getRealPosition());
-  
-  
-  
+   
   // Y-axis
   lcd.setCursor(0, 2);
   lcd.print("set lower y bound");
@@ -248,7 +274,7 @@ void calibrate(){
   while(buttons.getButtonEvent() != BUTTON_MID){
     delayMicroseconds(1);
   }
-  
+  plotter.x_axis.resetDiagnostics();
   plotter.moveHead(Z_UP);
   lcd.clear();
 }
@@ -525,26 +551,29 @@ void loop(){
             }
             break;
             
-          case 1: // SAVE STATE
+          case 1:
+            printDiagnostics();
+            
+          case 2: // SAVE STATE
             saveState();
             break;
             
-          case 2: // RESTORE STATE
+          case 3: // RESTORE STATE
             restoreState();
             break;
           
-          case 3: // MOVEMENT CONTROL         
+          case 4: // MOVEMENT CONTROL         
             break;
           
-          case 4: // CALIBRATE
+          case 5: // CALIBRATE
             calibrate();
             break;
             
-          case 5: // GCODE
+          case 6: // GCODE
             executeGCode();
             break;
             
-          case 6: // DRAW
+          case 7: // DRAW
             menuSel = MENU_DRAW;
             menuPosition = 0;
             menuWindowPosition = 0;

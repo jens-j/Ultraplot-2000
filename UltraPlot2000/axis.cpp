@@ -31,7 +31,19 @@ X_axis::X_axis() : sensor() {
   kickoff = false;
   direction = IDLE;
   cooldownTime = micros();
-  debugCount = 0;
+  resetDiagnostics();
+}
+
+void X_axis::resetDiagnostics(){
+  overshootCount = 0;
+  stallCount     = 0;
+  retriggerCount = 0;
+}
+
+void X_axis::getDiagnostics(int *diag){
+  diag[0] = overshootCount;
+  diag[1] = stallCount;
+  diag[2] = retriggerCount;
 }
 
 void X_axis::sensorIsr(){
@@ -62,12 +74,15 @@ void X_axis::sensorIsr(){
   if(direction != IDLE){
     setSpeed();
   }
+  else{
+    overshootCount++; 
+  }
   
   //sprintf(buffer, "isr: %d us", micros() - t);
   //panic(buffer);
   
   if( EIFR & (1<<2) != 0 || EIFR & (1<<3) != 0 ){
-    debugCount++;
+    retriggerCount++;
   }
 }
 
