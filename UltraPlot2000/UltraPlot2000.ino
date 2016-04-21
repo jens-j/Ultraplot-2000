@@ -152,11 +152,7 @@ void printStatus(){
 
 void panic(char *s){
   z_position_t head_pos;
-  
-  Serial.println("bom");
-  
-  delay(1000);
-  
+
   // disable interrupts
   WDTCSR &= ~(1<<WDIE); 
   detachInterrupt(digitalPinToInterrupt(SENSOR_X0));
@@ -182,9 +178,9 @@ void panic(char *s){
     
   // pause
   buttons.clearEvent();
-  Serial.println("bok");
+
   while( buttons.getButtonEvent() != BUTTON_MID ){
-    Serial.println("boe");
+    Serial.println("panic");
     delay(1000); 
   }
     
@@ -197,30 +193,6 @@ void panic(char *s){
     plotter.x_axis.setPosition( plotter.x_axis.getSetPoint() );
   }
 }
-
-//void saveState(){
-//  int address = 0;
-//  
-//  romWriteInt( address++, plotter.x_axis.getRealPosition() );
-//  romWriteInt( address++, plotter.x_axis.getBounds().b0 );
-//  romWriteInt( address++, plotter.x_axis.getBounds().b1 );
-//  romWriteInt( address++, plotter.y_axis.getPosition() );
-//  romWriteInt( address++, plotter.y_axis.getBounds().b0 );
-//  romWriteInt( address++, plotter.y_axis.getBounds().b1 );
-//  romWriteInt( address++, (int) plotter.z_axis.getPosition() );
-//}
-//
-//void restoreState(){
-//  int address = 0;
-// 
-//  plotter.x_axis.initPosition( romReadInt(address++) );
-//  plotter.x_axis.setBounds( {romReadInt(address), romReadInt(address+1)} );
-//  address += 2;
-//  plotter.y_axis.initPosition( romReadInt(address++) );
-//  plotter.y_axis.setBounds( {romReadInt(address), romReadInt(address+1)} );
-//  address += 2;
-//  plotter.z_axis.initPosition( (z_position_t) romReadInt(address++) );
-//}
 
 void calibrate(){
   int xbound0, xbound1;
@@ -313,21 +285,6 @@ void calibrate(){
   plotter.y_axis.initPosition(yrange - 1); 
   plotter.y_axis.setPosition(yrange / 2);
   
-  // Overview
-//  lcd.clear();
-//  lcd.setCursor(0, 0);
-//  lcd.print("Calibration results:");
-//  lcd.setCursor(0, 1);
-//  sprintf(lcdBuffer, "X: [%d,%d]", plotter.x_axis.getBounds().b0, plotter.x_axis.getBounds().b1);
-//  lcd.print(lcdBuffer);
-//  lcd.setCursor(0, 2);
-//  sprintf(lcdBuffer, "Y: [%d,%d]", plotter.y_axis.getBounds().b0, plotter.y_axis.getBounds().b1);
-//  lcd.print(lcdBuffer);
-//  lcd.setCursor(0, 3);
-//  sprintf(lcdBuffer, "%umm x %umm", (unsigned int) (xrange * X_STEPSIZE), (unsigned int) (yrange * Y_STEPSIZE));
-//  lcd.print(lcdBuffer);
-//  buttons.clearEvent();
-
   printStatus();
 
   while(buttons.getButtonEvent() != BUTTON_MID){
@@ -504,13 +461,7 @@ void executeGCode(){
       while(plotter.x_axis.getDirection() != IDLE){} // finish last move
       pausePos = plotter.z_axis.getPosition();
       plotter.moveHead(Z_UP);
-      
-//      lcd.setCursor(0,1);
-//      lcd.print("                   ");
-//      lcd.setCursor(0,2);
-//      lcd.print("paused             ");
-//      lcd.setCursor(0,3);
-//      lcd.print("                   ");
+
       printStatus();
       
       buttons.clearEvent();

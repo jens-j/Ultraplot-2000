@@ -27,9 +27,6 @@ private:
   int stallCount;     // }diagnostics 
   int retriggerCount; // }
   int wdtCount;       // counts the number of consecutive wdt interrupts
-  //double filterDelay[FILTER_N];
-  //int filterCount;
-  //int filterIndex;
   double pidOutput; // PWM
   double previousError;
   unsigned long pidTime;

@@ -12,14 +12,7 @@
 X_axis::X_axis() : sensor() {
   char buffer[20];
   int i;
-  //filterCount = 0;
   logCount = 0;
-//  for(i = 0; i < LOGSIZE; i++){
-//    rLog[i] = 0;
-//    vLog[i] = 0;
-//    //pidLog[i] = 0;
-//  }
-  //logTime = micros();
   pidTime = micros();
   sdata0 = 0;
   rPosition = 0;
@@ -48,7 +41,6 @@ void X_axis::getDiagnostics(int *diag){
 
 void X_axis::sensorIsr(){
   char buffer[20];
-  //unsigned long t = micros();
   wdt_reset();
   wdtCount = 0;
   int sdata = sensor.decodeSensor();
@@ -81,9 +73,6 @@ void X_axis::sensorIsr(){
     overshootCount++; 
   }
   
-  //sprintf(buffer, "isr: %d us", micros() - t);
-  //panic(buffer);
-  
   if( EIFR & (1<<2) != 0 || EIFR & (1<<3) != 0 ){
     retriggerCount++;
   }
@@ -95,8 +84,7 @@ void X_axis::wdTimerIsr(){
   
   wdtCount++;
   stallCount++;
-  
-  //if( wdtCount == X_WDT_SNOOZE ){
+
   if( (int) pidOutput + wdtCount == X_PWM_MAX + 1){
      sprintf(cBuffer, "wdt ovf (%d, %d)", setPoint - rPosition, traveled);
      panic(cBuffer);
@@ -125,7 +113,6 @@ void X_axis::setSpeed(){
   int i;
   double v; // speed setpoint
   double r; // actual speed
-  //double f_r; // filtered actual speed
   double e; // error 
   double d_e; // differential error
   double d_v;; // setpoint 
@@ -146,21 +133,6 @@ void X_axis::setSpeed(){
   // calculate the actual speed (mm/s)
   r = (X_STEPSIZE * 1E6) / ((double) (micros() - pidTime));
   pidTime = micros();
-    
-  // filter
-  //filterDelay[filterIndex] = r;
-  //if(++filterIndex == FILTER_N){
-  //  filterIndex = 0;
-  //}
-  //if(filterCount < FILTER_N){
-  //  filterCount++;    
-  //}
-  
-  //f_r = 0.0;
-  //for(i = 0; i < filterCount; i++){
-  //  f_r += filterDelay[i];
-  //}
-  //f_r /= filterCount;
   
   // set a initial PWM value in the first cycle of a new move
   if(kickoff == true){
@@ -170,7 +142,6 @@ void X_axis::setSpeed(){
     r = v;
   } 
   else{
-      
     // calculate pwm change 
     e = v - r;
     d_e = e - previousError;
@@ -265,9 +236,7 @@ void X_axis::initMove(int setp){
   // flag the start of a new move
   traveled = 0;
   kickoff = true;
-  //filterCount = 0;
-  //filterIndex = 0;
-  
+
   // set direction and speed
   direction = IDLE;
   if(rPosition > setPoint){
@@ -460,12 +429,8 @@ void Z_axis::setPosition(z_position_t setPoint){
     moveRelative(-40);
     position = Z_UP;
   }
-    
-  //sprintf(cBuffer, "set head from %d to %d", position, setPoint);
-  //Serial.println(cBuffer); 
 
   moveRelative(setPoint - position);
-
   position = setPoint;
 }
 
@@ -486,7 +451,6 @@ String Z_axis::posToString(){
     case Z_UNKNOWN:
       return "UNKNOWN";
       break;
-     
   }  
 }
 
