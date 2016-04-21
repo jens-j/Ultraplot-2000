@@ -11,7 +11,7 @@ int t0, t1, t2, t3 = 0;
 
 void setup(){
   print(Serial.list());
-  String portName = "/dev/ttyUSB1"; 
+  String portName = "/dev/ttyUSB3"; 
   //String portName = Serial.list()[0]; //change the 0 to a 1 or 2 etc. to match your port
   myPort = new Serial(this, portName, 115200); 
   
@@ -29,10 +29,9 @@ void draw()
    s = myPort.readStringUntil('\n');  
     
    //t1 = millis() - t0;
-    
-   print("[A -> P] " + s);
-   if(s != "null"){
    
+   if(s != null){
+     print("[A -> P] " + s);
      if(s.equals("next\r\n")){
      
        try {

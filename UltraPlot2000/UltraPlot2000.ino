@@ -9,10 +9,11 @@
 #include "shapes.h"
 
 
-const int  N_MENU_ENTRIES[2] = {8, 4};
+const int  N_MENU_ENTRIES[2] = {9, 4};
 
-const char MAIN_MENU_TEXT[8][20] = {"Toggle head        ",
+const char MAIN_MENU_TEXT[9][20] = {"Toggle head        ",
                                     "Print Diagnostics  ",
+                                    "Reset Diagnostics  ",
                                     "Save State         ",
                                     "Restore State      ",
                                     "Movement Control   ",
@@ -72,38 +73,89 @@ void timerIsrDispatcher(){
 }
 
 
-void printDiagnostics(){
+void printStatus(){
   int diag[3];
   char buffer[20];
   
   plotter.x_axis.getDiagnostics(&diag[0]);
-  
   lcd.clear();
   
+  // BOUNDS & DARWING AREA SIZE
   lcd.setCursor(0, 0);
-  lcd.print("[Diagnostics]");
+  lcd.print("[Bounds & Size]");
   
   lcd.setCursor(0, 1);
-  sprintf(buffer, "overshoot = %d", diag[0]);
+  sprintf(buffer, "x [%d,%d]", plotter.x_axis.getBounds().b0, plotter.x_axis.getBounds().b1);
   lcd.print(buffer);
   
   lcd.setCursor(0, 2);
-  sprintf(buffer, "stall     = %d", diag[1]);
+  sprintf(buffer, "y [%d,%d]", plotter.y_axis.getBounds().b0, plotter.y_axis.getBounds().b1);
   lcd.print(buffer);
   
   lcd.setCursor(0, 3);
-  sprintf(buffer, "retrigger = %d", diag[2]);
+  sprintf(buffer, "%umm x %umm ", (unsigned int) ( (plotter.x_axis.getBounds().b1 - plotter.x_axis.getBounds().b0) * X_STEPSIZE), 
+                                    (unsigned int) ( (plotter.y_axis.getBounds().b1 - plotter.y_axis.getBounds().b0) * Y_STEPSIZE));
   lcd.print(buffer);
   
   buttons.clearEvent();
   while( buttons.getButtonEvent() != BUTTON_MID ){
     delayMicroseconds(1); 
   }
-  plotter.x_axis.resetDiagnostics();
+  
+  // X, Y, Z POSITIONS
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("[Position]");
+  
+  lcd.setCursor(0, 1);
+  sprintf(buffer, "x = %d", plotter.x_axis.getRealPosition());
+  lcd.print(buffer);
+  
+  lcd.setCursor(0, 2);
+  sprintf(buffer, "y = %d", plotter.y_axis.getPosition());
+  lcd.print(buffer);
+  
+  lcd.setCursor(0, 3);
+  sprintf(buffer, "z = %s (%d)", plotter.z_axis.posToString().c_str(), plotter.z_axis.getPosition());
+  lcd.print(buffer);
+   
+  buttons.clearEvent();
+  while( buttons.getButtonEvent() != BUTTON_MID ){
+    delayMicroseconds(1); 
+  }
+  
+  // DIAGNOSTICS
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("[Diagnostics]");
+  
+  lcd.setCursor(0, 1);
+  sprintf(buffer, "overshoot = %8d", diag[0]);
+  lcd.print(buffer);
+  
+  lcd.setCursor(0, 2);
+  sprintf(buffer, "stall     = %8d", diag[1]);
+  lcd.print(buffer);
+  
+  lcd.setCursor(0, 3);
+  sprintf(buffer, "retrigger = %8d", diag[2]);
+  lcd.print(buffer);
+  
+  buttons.clearEvent();
+  while( buttons.getButtonEvent() != BUTTON_MID ){
+    delayMicroseconds(1); 
+  }
+  
+  lcd.clear();
+  
 }
 
 void panic(char *s){
   z_position_t head_pos;
+  
+  Serial.println("bom");
+  
+  delay(1000);
   
   // disable interrupts
   WDTCSR &= ~(1<<WDIE); 
@@ -124,14 +176,18 @@ void panic(char *s){
   lcd.setCursor(0, 2);
   lcd.print(s);
   
+  plotter.saveState();
+  
+  printStatus(); // this blocks until a buttons is pressed
+    
   // pause
   buttons.clearEvent();
+  Serial.println("bok");
   while( buttons.getButtonEvent() != BUTTON_MID ){
-    delayMicroseconds(1);
+    Serial.println("boe");
+    delay(1000); 
   }
-  
-  printDiagnostics(); // this blocks until a buttons is pressed
-  
+    
   // restore state
   lcd.clear();
   plotter.moveHead(head_pos);
@@ -142,29 +198,29 @@ void panic(char *s){
   }
 }
 
-void saveState(){
-  int address = 0;
-  
-  romWriteInt( plotter.x_axis.getRealPosition(), address++ );
-  romWriteInt( plotter.x_axis.getBounds().b0, address++ );
-  romWriteInt( plotter.x_axis.getBounds().b1, address++ );
-  romWriteInt( plotter.y_axis.getPosition(), address++ );
-  romWriteInt( plotter.y_axis.getBounds().b0, address++ );
-  romWriteInt( plotter.y_axis.getBounds().b1, address++ );
-  romWriteInt( (int) plotter.z_axis.getPosition(), address++ );
-}
-
-void restoreState(){
-  int address = 0;
- 
-  plotter.x_axis.initPosition( romReadInt(address++) );
-  plotter.x_axis.setBounds( {romReadInt(address), romReadInt(address+1)} );
-  address += 2;
-  plotter.y_axis.initPosition( romReadInt(address++) );
-  plotter.y_axis.setBounds( {romReadInt(address), romReadInt(address+1)} );
-  address += 2;
-  plotter.z_axis.initPosition( (z_position_t) romReadInt(address++) );
-}
+//void saveState(){
+//  int address = 0;
+//  
+//  romWriteInt( address++, plotter.x_axis.getRealPosition() );
+//  romWriteInt( address++, plotter.x_axis.getBounds().b0 );
+//  romWriteInt( address++, plotter.x_axis.getBounds().b1 );
+//  romWriteInt( address++, plotter.y_axis.getPosition() );
+//  romWriteInt( address++, plotter.y_axis.getBounds().b0 );
+//  romWriteInt( address++, plotter.y_axis.getBounds().b1 );
+//  romWriteInt( address++, (int) plotter.z_axis.getPosition() );
+//}
+//
+//void restoreState(){
+//  int address = 0;
+// 
+//  plotter.x_axis.initPosition( romReadInt(address++) );
+//  plotter.x_axis.setBounds( {romReadInt(address), romReadInt(address+1)} );
+//  address += 2;
+//  plotter.y_axis.initPosition( romReadInt(address++) );
+//  plotter.y_axis.setBounds( {romReadInt(address), romReadInt(address+1)} );
+//  address += 2;
+//  plotter.z_axis.initPosition( (z_position_t) romReadInt(address++) );
+//}
 
 void calibrate(){
   int xbound0, xbound1;
@@ -231,7 +287,7 @@ void calibrate(){
   ybound0 = plotter.y_axis.getPosition();
   lcd.setCursor(0, 2);
   lcd.print("set upper y bound");
-  // plotter.y_axis.setPosition( plotter.x_axis.getPosition() + (160 / Y_STEPSIZE) ); // move up 16 cm
+  plotter.y_axis.setPosition( plotter.x_axis.getPosition() + (160 / Y_STEPSIZE) ); // move up 16 cm
   buttons.clearEvent();
   while(buttons.getButtonEvent() != BUTTON_MID){
     if(buttons.isPressed() == BUTTON_LEFT){
@@ -258,23 +314,26 @@ void calibrate(){
   plotter.y_axis.setPosition(yrange / 2);
   
   // Overview
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Calibration results:");
-  lcd.setCursor(0, 1);
-  sprintf(lcdBuffer, "X: [%d,%d]", plotter.x_axis.getBounds().b0, plotter.x_axis.getBounds().b1);
-  lcd.print(lcdBuffer);
-  lcd.setCursor(0, 2);
-  sprintf(lcdBuffer, "Y: [%d,%d]", plotter.y_axis.getBounds().b0, plotter.y_axis.getBounds().b1);
-  lcd.print(lcdBuffer);
-  lcd.setCursor(0, 3);
-  sprintf(lcdBuffer, "%umm x %umm", (unsigned int) (xrange * X_STEPSIZE), (unsigned int) (yrange * Y_STEPSIZE));
-  lcd.print(lcdBuffer);
-  buttons.clearEvent();
+//  lcd.clear();
+//  lcd.setCursor(0, 0);
+//  lcd.print("Calibration results:");
+//  lcd.setCursor(0, 1);
+//  sprintf(lcdBuffer, "X: [%d,%d]", plotter.x_axis.getBounds().b0, plotter.x_axis.getBounds().b1);
+//  lcd.print(lcdBuffer);
+//  lcd.setCursor(0, 2);
+//  sprintf(lcdBuffer, "Y: [%d,%d]", plotter.y_axis.getBounds().b0, plotter.y_axis.getBounds().b1);
+//  lcd.print(lcdBuffer);
+//  lcd.setCursor(0, 3);
+//  sprintf(lcdBuffer, "%umm x %umm", (unsigned int) (xrange * X_STEPSIZE), (unsigned int) (yrange * Y_STEPSIZE));
+//  lcd.print(lcdBuffer);
+//  buttons.clearEvent();
+
+  printStatus();
+
   while(buttons.getButtonEvent() != BUTTON_MID){
     delayMicroseconds(1);
   }
-  plotter.x_axis.resetDiagnostics();
+  plotter.saveState();
   plotter.moveHead(Z_UP);
   lcd.clear();
 }
@@ -436,7 +495,7 @@ void executeGCode(){
     minutes = (seconds / 60) % 60;
     seconds = seconds % 60;
     lcd.setCursor(0,3);
-    sprintf(lcdBuffer, "time: %02d:%02d:%02d", hours, minutes, seconds);
+    sprintf(lcdBuffer, "run time: %02d:%02d:%02d", hours, minutes, seconds);
     lcd.print(lcdBuffer);
 
     // pause
@@ -445,12 +504,16 @@ void executeGCode(){
       while(plotter.x_axis.getDirection() != IDLE){} // finish last move
       pausePos = plotter.z_axis.getPosition();
       plotter.moveHead(Z_UP);
-      lcd.setCursor(0,1);
-      lcd.print("                   ");
-      lcd.setCursor(0,2);
-      lcd.print("paused             ");
-      lcd.setCursor(0,3);
-      lcd.print("                   ");
+      
+//      lcd.setCursor(0,1);
+//      lcd.print("                   ");
+//      lcd.setCursor(0,2);
+//      lcd.print("paused             ");
+//      lcd.setCursor(0,3);
+//      lcd.print("                   ");
+      printStatus();
+      
+      buttons.clearEvent();
       while(buttons.getButtonEvent() == BUTTON_NONE){
         delayMicroseconds(1);
       }
@@ -500,7 +563,7 @@ void setup(){
   // set up WDT interrupt
   wdt_reset();
   WDTCSR |= (1<<WDCE) | (1<<WDE); // change enable
-  WDTCSR = (1<<WDP1) | (1<<WDP0); // timeout = 125 ms 
+  WDTCSR = (1<<WDP1); // timeout = 64 ms 
   
   // attach external interrupt for the sensor
   attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);
@@ -542,6 +605,7 @@ void loop(){
       
       case MENU_MAIN:
         switch(menuPosition){
+          
           case 0: // TOGGLE HEAD
             if(plotter.z_axis.getPosition() == Z_UP){
               plotter.moveHead(Z_DOWN);
@@ -551,29 +615,56 @@ void loop(){
             }
             break;
             
-          case 1:
-            printDiagnostics();
-            
-          case 2: // SAVE STATE
-            saveState();
+          case 1: // PRINT DIAGNOSTICS
+            printStatus();
             break;
             
-          case 3: // RESTORE STATE
-            restoreState();
+          case 2: // RESET DIAGNOSTICS 
+            plotter.x_axis.resetDiagnostics();
+            break;
+            
+          case 3: // SAVE STATE
+            plotter.saveState();
+            
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("saved to EEPROM");
+            
+            buttons.clearEvent();
+            while(buttons.getButtonEvent() == BUTTON_NONE){
+              delayMicroseconds(1);
+            }
+            
+            break;
+            
+          case 4: // RESTORE STATE
+            plotter.restoreState();
+            
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("restored from EEPROM");
+            
+            buttons.clearEvent();
+            while(buttons.getButtonEvent() == BUTTON_NONE){
+              delayMicroseconds(1);
+            }
+            
+            printStatus();
+            
             break;
           
-          case 4: // MOVEMENT CONTROL         
+          case 5: // MOVEMENT CONTROL         
             break;
           
-          case 5: // CALIBRATE
+          case 6: // CALIBRATE
             calibrate();
             break;
             
-          case 6: // GCODE
+          case 7: // GCODE
             executeGCode();
             break;
             
-          case 7: // DRAW
+          case 8: // DRAW
             menuSel = MENU_DRAW;
             menuPosition = 0;
             menuWindowPosition = 0;

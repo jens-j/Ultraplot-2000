@@ -60,23 +60,24 @@
 #define XY_SCALE          (X_STEPSIZE / Y_STEPSIZE)
 #define YX_SCALE          (Y_STEPSIZE / X_STEPSIZE)
 #define Y_STEPPER_PWM     110
-#define X_PWM_INIT        80   // initial PWM value used to initialed moves
+#define X_PWM_INIT        80   // PWM value used to initiale moves
 #define X_PWM_MIN         60
 #define X_PWM_MAX         130
 #define X_SPEED_MIN       5    // mm/s 
 #define X_SPEED_QUICK     180  // mm/s 
 #define X_SPEED_DRAW      20   // mm/s 
-#define X_SPEED_SLOPE     0.40 // mm/s/step 
-#define X_WDT_SNOOZE      20   // the number of wdt interrupts that lead to a panic (each interrupt increments the PWM value)
+#define X_SPEED_SLOPE     0.40 // mm/s/step. slope used to ramp down the speed near the endpoint
+#define X_BORDER_WIDTH    20   // steps. width of the border around the x bounds to allow for overshoot without an out of bounds error
 #define X_COOLDOWN        2000 // in us
+#define X_PID_P           0.2  // 
+#define X_PID_D           1    //
 #define Y_COOLDOWN_MIN    1500 // in us (1200)
 #define Y_COOLDOWN_MAX    3000 // in us (2400)
 #define Y_COOLDOWN_RAMP   200  // in steps
 #define Z_COOLDOWN_MIN 	  800  // in us
 #define Z_COOLDOWN_MAX 	  3000 // in us
 #define Z_COOLDOWN_RAMP   40   // in steps
-#define PID_P             0.2  // 
-#define PID_D             1    //
+
 
 
 

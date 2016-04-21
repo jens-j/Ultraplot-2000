@@ -1,12 +1,43 @@
 #include "Arduino.h"
 #include "ultraPlot2000.h"
 #include "axis.h"
+#include "EEPROMlib.h"
 
 Plotter::Plotter(){
   x_axis = X_axis();
   y_axis = Y_axis();
   z_axis = Z_axis();
+  
   position = {0.0, 0.0};
+  
+  // lead the position and bounds from EEPROM
+  //restoreState();
+}
+
+
+void Plotter::saveState(){
+  int address = 0;
+  
+  romWriteInt( address++, x_axis.getRealPosition() );
+  romWriteInt( address++, x_axis.getBounds().b0 );
+  romWriteInt( address++, x_axis.getBounds().b1 );
+  romWriteInt( address++, y_axis.getPosition() );
+  romWriteInt( address++, y_axis.getBounds().b0 );
+  romWriteInt( address++, y_axis.getBounds().b1 );
+  romWriteInt( address++, (int) z_axis.getPosition() );
+}
+
+
+void Plotter::restoreState(){
+  int address = 0;
+ 
+  x_axis.initPosition( romReadInt(address++) );
+  x_axis.setBounds( {romReadInt(address), romReadInt(address+1)} );
+  address += 2;
+  y_axis.initPosition( romReadInt(address++) );
+  y_axis.setBounds( {romReadInt(address), romReadInt(address+1)} );
+  address += 2;
+  z_axis.initPosition( (z_position_t) romReadInt(address++) );
 }
 
 

@@ -25,6 +25,10 @@ class Plotter{
                 // constructor
 		Plotter();
 
+                // load/store state from/to EEPROM
+                void restoreState();
+                void saveState();
+                
                 // head
                 void moveHead(z_position_t);
 

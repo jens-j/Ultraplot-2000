@@ -108,6 +108,7 @@ public:
   z_position_t getPosition();
   void setPosition(z_position_t);
   void initPosition(z_position_t pos) {position = pos;}
+  String posToString();
 };
 
 

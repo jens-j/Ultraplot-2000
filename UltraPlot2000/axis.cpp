@@ -62,13 +62,15 @@ void X_axis::sensorIsr(){
     traveled--;
   }
   
-  if(rPosition < bounds.b0){
-    sprintf(buffer, "x bound %d<%d", rPosition, bounds.b0);
-    panic(buffer);
+  if(rPosition < bounds.b0 - X_BORDER_WIDTH){
+    Serial.println("x bound");
+    //sprintf(buffer, "x bound %d<%d", rPosition, bounds.b0);
+    panic("x bound");
   }
-  if(rPosition > bounds.b1){
-    sprintf(buffer, "x bound %d>%d", rPosition, bounds.b1);
-    panic(buffer);
+  if(rPosition > bounds.b1 + X_BORDER_WIDTH){
+    Serial.println("x bound");
+    //sprintf(buffer, "x bound %d>%d", rPosition, bounds.b1);
+    panic("x bound");
   }  
   
   sdata0 = sdata;  
@@ -94,15 +96,22 @@ void X_axis::wdTimerIsr(){
   wdtCount++;
   stallCount++;
   
-  if( wdtCount == X_WDT_SNOOZE ){
+  //if( wdtCount == X_WDT_SNOOZE ){
+  if( (int) pidOutput + wdtCount == X_PWM_MAX + 1){
      sprintf(cBuffer, "wdt ovf (%d, %d)", setPoint - rPosition, traveled);
      panic(cBuffer);
   }
   else{
+    
+    sprintf(cBuffer, "wdt ovf speed: %d", (int) pidOutput + wdtCount);
+    Serial.println(cBuffer);
+     
     if( direction == LEFT ){
       analogWrite(MOTOR_X0, (int) pidOutput + wdtCount);
+      analogWrite(MOTOR_X1, 0);
     } 
     else if( direction == RIGHT ){
+      analogWrite(MOTOR_X0, 0);
       analogWrite(MOTOR_X1, (int) pidOutput + wdtCount);
     }
     else{
@@ -166,7 +175,7 @@ void X_axis::setSpeed(){
     e = v - r;
     d_e = e - previousError;
     previousError = e;
-    d_v = PID_P * e + PID_D * d_e;
+    d_v = X_PID_P * e + X_PID_D * d_e;
     pidOutput += d_v;
   }
   
@@ -459,5 +468,27 @@ void Z_axis::setPosition(z_position_t setPoint){
 
   position = setPoint;
 }
+
+String Z_axis::posToString(){
+  switch( position ){
+    case Z_UP:
+      return "UP";
+      break;
+    case Z_MID:
+      return "MID";
+      break;
+    case Z_LOW:
+      return "LOW";
+      break;
+    case Z_DOWN:
+      return "DOWN";
+      break;
+    case Z_UNKNOWN:
+      return "UNKNOWN";
+      break;
+     
+  }  
+}
+
 
 

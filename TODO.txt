@@ -1,17 +1,14 @@
 BUGS
 - wtf.log
-- no wdt
+- non-responsive panic menu on x out of bounds and wdt overflow
 
 SMALL FEATURES
 - frame/limit setting to center images
-- keep a ~10 step safe border to allow less precise but faster drawing
-- create a save/restore to EEPROM menu item
 - direct movement controls 
 - LCD text during y calibration (wait...)
+- redirect the processing output to a file  
 
-BIGGER FEATURES
+BIG FEATURES
 - brown-out save routine
 
-IMPLEMENTED BUT NOT COMLETELY TESTED:
-- EEPROM storage for calibration and position
-- X axis watchdog timer
+NOT TESTED:
