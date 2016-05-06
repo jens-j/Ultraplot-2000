@@ -147,9 +147,10 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
   radius = sqrt(pow((x3 - x0), 2) + pow((y3 - y0), 2));
   
   if(DEBUG){
-    sprintf(cBuffer, "\nstart(%ld, %ld), rPos(%ld, %ld), end(%ld, %ld), O(%ld, %ld), IJ(%ld, %ld), d(%ld, %ld), R=%ld\n",  
-              x1, y1, (long) (x_axis.getRealPosition() * XY_SCALE), y2, x3, y3, x0, y0, i, j, dx, dy, radius);
+    sprintf(cBuffer, "\nstart(%ld, %ld), rPos(%ld, %ld), end(%ld, %ld), O(%ld, %ld), IJ(%ld, %ld), d(%ld, %ld), R=",  
+              x1, y1, (long) (x_axis.getRealPosition() * XY_SCALE), y2, x3, y3, x0, y0, i, j, dx, dy);
     Serial.print(cBuffer);
+    Serial.println(radius,3);
   }
 
   while(!(y2 == y3 && (SIGN(x2 - x0) == SIGN(x3 - x0) || x3 - x0 == 0 || x2 - x0 == 0))){

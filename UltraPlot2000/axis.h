@@ -41,8 +41,8 @@ private:
   int setPoint;    // in real coordinates
   int traveled;    // number of steps taken in current move
   bounds_t bounds; // in real coordinates
-  boolean quick;   // flag to enable quick move
-  boolean kickoff; // flags start of move, used to overcome static friction
+  bool quick;     // flag to enable quick move
+  bool kickoff;   // flags start of move, used to overcome static friction
   x_direction_t direction;
   unsigned long cooldownTime;
   Sensor sensor;

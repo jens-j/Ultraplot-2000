@@ -11,7 +11,7 @@ int t0, t1, t2, t3 = 0;
 
 void setup(){
   print(Serial.list());
-  String portName = "/dev/ttyUSB0"; 
+  String portName = "/dev/ttyUSB1"; 
   //String portName = Serial.list()[0]; //change the 0 to a 1 or 2 etc. to match your port
   myPort = new Serial(this, portName, 115200); 
   
