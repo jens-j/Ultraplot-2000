@@ -12,7 +12,7 @@
 const int  N_MENU_ENTRIES[2] = {9, 4};
 
 const char MAIN_MENU_TEXT[9][20] = {"Toggle head        ",
-                                    "Print Diagnostics  ",
+                                    "Print State        ",
                                     "Reset Diagnostics  ",
                                     "Save State         ",
                                     "Restore State      ",
@@ -147,7 +147,6 @@ void printStatus(){
   }
   
   lcd.clear();
-  
 }
 
 void panic(char *s){
@@ -170,7 +169,7 @@ void panic(char *s){
   lcd.setCursor(0, 0);
   lcd.print("[Panic!]");
   lcd.setCursor(0, 2);
-  lcd.print(s);
+  //lcd.print(s);
   
   plotter.saveState();
   
@@ -257,9 +256,14 @@ void calibrate(){
     }
   }  
   ybound0 = plotter.y_axis.getPosition();
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("[Calibration mode]");
+  lcd.setCursor(0, 2);
+  lcd.print("wait...");
+  plotter.y_axis.setPosition( plotter.x_axis.getPosition() + (160 / Y_STEPSIZE) ); // move up 16 cm
   lcd.setCursor(0, 2);
   lcd.print("set upper y bound");
-  plotter.y_axis.setPosition( plotter.x_axis.getPosition() + (160 / Y_STEPSIZE) ); // move up 16 cm
   buttons.clearEvent();
   while(buttons.getButtonEvent() != BUTTON_MID){
     if(buttons.isPressed() == BUTTON_LEFT){
@@ -340,17 +344,6 @@ void executeGCode(){
   lcd.print("[Executing GCode]");
   
   plotter.moveHead(Z_UP);
-
-//  int k = 0;
-//  char test[6][100] = {   "G00 X77.583856 Y176.185749",
-//                          "G01 Z-0.125000 F100.0(Penetrate)",
-//                          "G03 X77.760509 Y176.412419 Z-0.125000 I-0.017843 J0.196078",
-//                          "G03 X77.543226 Y176.596975 Z-0.125000 I-0.215832 J-0.033921",
-//                          "G02 X77.269796 Y176.608211 Z-0.125000 I-0.019060 J2.868845",
-//                          "G00 Z5.000000"
-//                          };
-  
-  //Serial.println("start");
   
   while(1){
     Serial.println("next");
@@ -359,16 +352,16 @@ void executeGCode(){
       delayMicroseconds(1); 
     }
     
-    
-    //s = test[k++];  
     s = Serial.readString(); 
     s.toCharArray(cBuffer, 100);
-
-    //Serial.print(s);
-
+    
     if(strstr(cBuffer, "%")){
       break;
     }
+
+    // echo the string
+    if(DEBUG)
+      Serial.println(s);
 
     lcd.setCursor(0, 1);
     
@@ -383,12 +376,10 @@ void executeGCode(){
         z = atof(++c1);
         if(z > 0){
           lcd.print("move head up   ");
-          //Serial.println("move head mid");
           plotter.moveHead(Z_LOW);
         }
         else{
           lcd.print("move head down");
-          //Serial.println("move head down");
           plotter.moveHead(Z_DOWN);
         }
       }
@@ -404,12 +395,10 @@ void executeGCode(){
         z = atof(++c1);
         if(z > 0){
           lcd.print("move head up   ");
-          //Serial.println("move head up");
           plotter.moveHead(Z_LOW);
         }
         else{
           lcd.print("move head down");
-          //Serial.println("move head down");
           plotter.moveHead(Z_DOWN);
         }
       }
@@ -425,14 +414,12 @@ void executeGCode(){
       }
     }
     else if(strstr(cBuffer, "G03")){
-      //Serial.println(cBuffer);
       if((c1 = strstr(cBuffer, "X")) && (c2 = strstr(cBuffer, "Y")) && (c3 = strstr(cBuffer, "I")) && (c4 = strstr(cBuffer, "J"))){
         x = atof(++c1);
         y = atof(++c2);
         i = atof(++c3);
         j = atof(++c4);
         lcd.print("arc CCW        ");
-        //Serial.println(y,6);
         plotter.arcAbsolute(x,y,i,j, CCW);
       }
     }
@@ -572,6 +559,15 @@ void loop(){
             
           case 2: // RESET DIAGNOSTICS 
             plotter.x_axis.resetDiagnostics();
+            
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("Cleared diagnostics");
+            
+            buttons.clearEvent();
+            while(buttons.getButtonEvent() == BUTTON_NONE){
+              delayMicroseconds(1);
+            }
             break;
             
           case 3: // SAVE STATE

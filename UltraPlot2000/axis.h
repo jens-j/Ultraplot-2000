@@ -11,7 +11,7 @@
 #define FILTER_N 1
 
 // positions of the plotter head 
-enum z_position_t  {Z_UP = 0, Z_DOWN = 40, Z_MID = 30, Z_LOW = 36, Z_UNKNOWN = 255};
+enum z_position_t  {Z_UP = 0, Z_DOWN = 40, Z_MID = 30, Z_LOW = 35, Z_UNKNOWN = 255};
 enum x_direction_t {LEFT, RIGHT, IDLE};
 
 
@@ -55,12 +55,12 @@ public:
   void wdTimerIsr();
   void stepLeft();
   void stepRight();
-  int getPosition();
-  int getSetPoint();
-  int getRealPosition();
-  void setPosition(int);
-  void quickSetPosition(int);
-  void setBounds(bounds_t);
+  int getPosition(); // virtual coordinates
+  int getSetPoint(); // real coordinates
+  int getRealPosition(); 
+  void setPosition(int); // virtual coordinates
+  void quickSetPosition(int); // virtual coordinates
+  void setBounds(bounds_t); // real coordinates
   bounds_t getBounds();
   void initPosition(int); // real coordinates
   void stop();

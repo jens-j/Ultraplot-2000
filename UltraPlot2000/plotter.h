@@ -36,9 +36,7 @@ class Plotter{
 		void moveAbsolute(int, int);
 		void quickAbsolute(int, int);
 		void moveRelative(int, int);
-		void arcAbsoluteCW(int, int, double, double);
-		void arcAbsoluteCCW(int, int, double, double);
-		void arcAbsolute(int, int, long, long, int);
+		void arcAbsolute(long, long, long, long, int);
 
 		// mm coordinates functions
                 position_t getPosition();

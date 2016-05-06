@@ -5,8 +5,7 @@ BUGS
 SMALL FEATURES
 - frame/limit setting to center images
 - direct movement controls 
-- LCD text during y calibration (wait...)
-- redirect the processing output to a file  
+- avoid false overshoot count during calibration
 
 BIG FEATURES
 - brown-out save routine

@@ -11,11 +11,11 @@ int t0, t1, t2, t3 = 0;
 
 void setup(){
   print(Serial.list());
-  String portName = "/dev/ttyUSB3"; 
+  String portName = "/dev/ttyUSB0"; 
   //String portName = Serial.list()[0]; //change the 0 to a 1 or 2 etc. to match your port
   myPort = new Serial(this, portName, 115200); 
   
-  reader = createReader("../gcode/batman.ngc");   
+  reader = createReader("../gcode/octopus_offset_filtered.ngc");   
   //reader = createReader("batman.ngc");   
   
 }
@@ -42,7 +42,7 @@ void draw()
          e.printStackTrace();
          line = null;
        }
-       println("[P -> A] " + line);
+       println("\n[P -> A] " + line);
        myPort.write(line);
       
      }

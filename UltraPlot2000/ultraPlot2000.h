@@ -10,19 +10,19 @@
 /*********************************************************/
 
 // X-axis
-#define SENSOR_X0  		20
-#define SENSOR_X1  		21
-#define SENSOR_INT              19 
-#define MOTOR_X0                10
-#define MOTOR_X1 		9
+#define SENSOR_X0		20
+#define SENSOR_X1		21
+#define SENSOR_INT		19 
+#define MOTOR_X0		10
+#define MOTOR_X1		9
 
 // Y-axis
-#define BUTTON_Y0               7
-#define BUTTON_Y1               8 
-#define MOTOR_Y0 		5
-#define MOTOR_Y1 		4
-#define MOTOR_Y2 		3
-#define MOTOR_Y3 		2
+#define BUTTON_Y0		7
+#define BUTTON_Y1		8 
+#define MOTOR_Y0		5
+#define MOTOR_Y1		4
+#define MOTOR_Y2		3
+#define MOTOR_Y3		2
 
 // Z-axis
 #define MOTOR_Z0 		46
@@ -40,19 +40,19 @@
 
 // Buttons
 #define BUTTON_UP 		35
-#define BUTTON_DOWN 	        27	
-#define BUTTON_LEFT 	        33
-#define BUTTON_RIGHT 	        29
-#define BUTTON_MID 		31
+#define BUTTON_DOWN		27	
+#define BUTTON_LEFT		33
+#define BUTTON_RIGHT	29
+#define BUTTON_MID		31
 
 // Other
-#define LED       		13
+#define LED				13
 
 
 /*********************************************************/
 /*	Constants			    
 /*********************************************************/
-#define DEBUG             0   // enables debug prints
+#define DEBUG             1   // enables debug prints
 #define BTN_DEBOUNCE_P    20  // button debounce period in ms
 #define BTN_RETRIGGER_P   300 // button retrigger period in ms
 #define X_STEPSIZE        0.0353 // in mm | Because the X resoluton is scaled to the Y resolution,
@@ -60,10 +60,10 @@
 #define XY_SCALE          (X_STEPSIZE / Y_STEPSIZE)
 #define YX_SCALE          (Y_STEPSIZE / X_STEPSIZE)
 #define Y_STEPPER_PWM     110
-#define X_PWM_INIT        80   // PWM value used to initiale moves
+#define X_PWM_INIT        80   // PWM value used to initiate moves
 #define X_PWM_MIN         60
 #define X_PWM_MAX         130
-#define X_SPEED_MIN       5    // mm/s 
+#define X_SPEED_MIN       1    // mm/s 
 #define X_SPEED_QUICK     180  // mm/s 
 #define X_SPEED_DRAW      20   // mm/s 
 #define X_SPEED_SLOPE     0.40 // mm/s/step. slope used to ramp down the speed near the endpoint
