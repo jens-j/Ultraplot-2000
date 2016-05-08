@@ -241,18 +241,18 @@ void Plotter::arcAbsolute(double setX, double setY, double i, double j, int dire
   // sprintf(cBuffer, "\nARC: end(%ld, %ld) IJ(%ld, %ld)", (long) setX, (long) setY), (long) i, (long) j;
   // Serial.print(cBuffer);
 
-  if(DEBUG){
-    Serial.print("ARC: end(");
-    Serial.print(setX,2);
-    Serial.print(",");
-    Serial.print(setY,2);
-    Serial.print(") IJ(");
-    Serial.print(i,2);
-    Serial.print(",");
-    Serial.print(j,2);
-    Serial.print(") direction=");
-    Serial.println(direction);
-  }
+  // if(DEBUG){
+  //   Serial.print("ARC: end(");
+  //   Serial.print(setX,2);
+  //   Serial.print(",");
+  //   Serial.print(setY,2);
+  //   Serial.print(") IJ(");
+  //   Serial.print(i,2);
+  //   Serial.print(",");
+  //   Serial.print(j,2);
+  //   Serial.print(") direction=");
+  //   Serial.println(direction);
+  // }
 
   arcAbsolute((long) (setX / Y_STEPSIZE), (long) (setY / Y_STEPSIZE), (long) (i / Y_STEPSIZE), (long) (j / Y_STEPSIZE), direction);
   
