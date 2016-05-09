@@ -172,8 +172,6 @@ void panic(char *s){
   //lcd.print(s);
   
   plotter.saveState();
-  
-  printStatus(); // this blocks until a buttons is pressed
     
   // pause
   buttons.clearEvent();
@@ -182,8 +180,10 @@ void panic(char *s){
     Serial.println("panic");
     delay(1000); 
   }
+  
+  printStatus(); // this blocks until a buttons is pressed
     
-  // restore state
+  // restore state (this doesn't really work in any situation)
   lcd.clear();
   plotter.moveHead(head_pos);
   attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);
@@ -289,13 +289,10 @@ void calibrate(){
   plotter.y_axis.initPosition(yrange - 1); 
   plotter.y_axis.setPosition(yrange / 2);
   
-  printStatus();
-
-  while(buttons.getButtonEvent() != BUTTON_MID){
-    delayMicroseconds(1);
-  }
   plotter.saveState();
   plotter.moveHead(Z_UP);
+  printStatus();
+  
   lcd.clear();
 }
 
@@ -427,10 +424,14 @@ void executeGCode(){
       count--;
       lcd.print("invalid command"); 
     }
-   
     
+    // print LCD header (required because pausing will draw other stuff on the LCD)
+    lcd.setCursor(0, 0);
+    lcd.print("[Calibration mode]");
+ 
+    // print number op performed operations
     lcd.setCursor(0,2);
-    sprintf(lcdBuffer, "%ld ops", count++);
+    sprintf(lcdBuffer, "%ld operations", count++);
     lcd.print(lcdBuffer);
     
     // calculate & print elapsed time
@@ -441,6 +442,7 @@ void executeGCode(){
     lcd.setCursor(0,3);
     sprintf(lcdBuffer, "run time: %02d:%02d:%02d", hours, minutes, seconds);
     lcd.print(lcdBuffer);
+    
 
     // pause
     if(buttons.getButtonEvent() != BUTTON_NONE){
