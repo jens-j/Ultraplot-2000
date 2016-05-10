@@ -15,7 +15,7 @@ void setup(){
   //String portName = Serial.list()[0]; //change the 0 to a 1 or 2 etc. to match your port
   myPort = new Serial(this, portName, 115200); 
   
-  reader = createReader("../gcode/octopus_offset_filtered.ngc");   
+  reader = createReader("../gcode/octopus_parsed.ngc");   
   //reader = createReader("batman.ngc");   
   
 }

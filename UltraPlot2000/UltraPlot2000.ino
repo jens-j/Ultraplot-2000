@@ -164,21 +164,22 @@ void panic(char *s){
   // retract head
   head_pos = plotter.z_axis.getPosition();
   plotter.moveHead(Z_UP);
+
+  Serial.print("PANIC: ");
+  Serial.println(s);
   
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("[Panic!]");
   lcd.setCursor(0, 2);
-  //lcd.print(s);
+  lcd.print(s);
   
   plotter.saveState();
     
   // pause
   buttons.clearEvent();
-
   while( buttons.getButtonEvent() != BUTTON_MID ){
-    Serial.println("panic");
-    delay(1000); 
+    delay(1); 
   }
   
   printStatus(); // this blocks until a buttons is pressed
@@ -503,7 +504,8 @@ void setup(){
   // set up WDT interrupt
   wdt_reset();
   WDTCSR |= (1<<WDCE) | (1<<WDE); // change enable
-  WDTCSR = (1<<WDP1); // timeout = 64 ms 
+  WDTCSR = (1<<WDP2); // timeout = 250 ms 
+  //WDTCSR = (1<<WDP1); // timeout = 64 ms 
   
   // attach external interrupt for the sensor
   attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);

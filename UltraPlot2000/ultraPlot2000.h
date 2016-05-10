@@ -42,11 +42,11 @@
 #define BUTTON_UP 		35
 #define BUTTON_DOWN		27	
 #define BUTTON_LEFT		33
-#define BUTTON_RIGHT	29
+#define BUTTON_RIGHT	        29
 #define BUTTON_MID		31
 
 // Other
-#define LED				13
+#define LED                     13
 
 
 /*********************************************************/

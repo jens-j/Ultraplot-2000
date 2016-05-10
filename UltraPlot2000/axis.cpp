@@ -55,14 +55,16 @@ void X_axis::sensorIsr(){
   }
   
   if(rPosition < bounds.b0 - X_BORDER_WIDTH){
-    Serial.println("x bound");
-    //sprintf(buffer, "x bound %d<%d", rPosition, bounds.b0);
-    panic("x bound");
+    //Serial.println("PANIC: x bound");
+    sprintf(buffer, "x bound %d<%d", rPosition, bounds.b0);
+    panic(buffer);
+    //panic("x bound");
   }
   if(rPosition > bounds.b1 + X_BORDER_WIDTH){
-    Serial.println("x bound");
-    //sprintf(buffer, "x bound %d>%d", rPosition, bounds.b1);
-    panic("x bound");
+    //Serial.println("PANIC: x bound");
+    sprintf(buffer, "x bound %d>%d", rPosition, bounds.b1);
+    panic(buffer);
+    //panic("x bound");
   }  
   
   sdata0 = sdata;  
@@ -210,13 +212,7 @@ int X_axis::getRealPosition(){
   return rPosition;
 }
 
-void X_axis::setPosition(int setp){
-
-  // wait for the head to settle from the previous move
-  while(direction != IDLE || (micros() - cooldownTime) < X_COOLDOWN){
-    delayMicroseconds(1);
-  }
-  
+void X_axis::setPosition(int setp){  
   quick = false;
   initMove(setp);
 }
@@ -227,6 +223,11 @@ void X_axis::quickSetPosition(int setp){
 }
 
 void X_axis::initMove(int setp){
+
+  // wait for the head to settle from the previous move
+  while(direction != IDLE || (micros() - cooldownTime) < X_COOLDOWN){
+    delayMicroseconds(1);
+  }
   
   vPosition = setp;
   

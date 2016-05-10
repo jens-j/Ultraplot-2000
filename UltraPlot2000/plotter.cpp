@@ -157,6 +157,8 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
     
     rx = x2 - x0;
     ry = y2 - y0;
+
+    phi = -999; // for debug
     
     if(direction == CCW && (rx > 0 || (rx == 0 && ry < 0))){
       //Serial.print("[CCW RH] ");
@@ -177,7 +179,6 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
 //          Serial.println(")");
 //        }
       }  
-      x_axis.setPosition(x2);
     } 
     else if(direction == CCW && (rx < 0 || (rx == 0 && ry > 0))){
       //Serial.print("[CCW LH] ");
@@ -191,7 +192,6 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
         phi = asin( (double) dy / radius );
         x2 = x0 - (long) (radius * cos(phi));
       }
-      x_axis.setPosition(x2);
     }
     else if(direction == CW && (rx > 0 || (rx == 0 && ry > 0))){
       //Serial.print("[CW RH] ");
@@ -205,7 +205,6 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
         phi = asin( (double) dy / radius );
         x2 = x0 + (long) (radius * cos(phi));
       }
-      x_axis.setPosition(x2);
     }
     else if(direction == CW && (rx < 0 || (rx == 0 && ry < 0))){
       //Serial.print("[CW LH] ");
@@ -219,9 +218,10 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
         phi = asin( (double) dy / radius );
         x2 = x0 - (long) (radius * cos(phi));
       }
-      x_axis.setPosition(x2);
     }
-    
+
+    x_axis.setPosition(x2);
+
     if(DEBUG){
       dx = x3 - x2;
       dy = y3 - y2;
