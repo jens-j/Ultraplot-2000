@@ -428,7 +428,7 @@ void executeGCode(){
     
     // print LCD header (required because pausing will draw other stuff on the LCD)
     lcd.setCursor(0, 0);
-    lcd.print("[Calibration mode]");
+    lcd.print("[Executing GCode]");
  
     // print number op performed operations
     lcd.setCursor(0,2);
