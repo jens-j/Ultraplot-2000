@@ -165,19 +165,12 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
       sticky |= 1;
       y2++;
       y_axis.stepUp();
-      dy = y2 - y0;
-      if((double) dy >= radius || (double) dy <= -radius)
+      ry = y2 - y0;
+      if((double) ry >= radius || (double) ry <= -radius)
         x2 = x0;
       else{
-        phi = asin( (double) dy / radius );
+        phi = asin( (double) ry / radius );
         x2 = x0 + (long) (radius * cos(phi));
-//        if(DEBUG){
-//          Serial.print(phi);
-//          sprintf(cBuffer, " = asin(");
-//          Serial.print(cBuffer);
-//          Serial.print( (double) dy / radius );
-//          Serial.println(")");
-//        }
       }  
     } 
     else if(direction == CCW && (rx < 0 || (rx == 0 && ry > 0))){
@@ -185,11 +178,11 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
       sticky |= 2;
       y2--;
       y_axis.stepDown();
-      dy = y2 - y0;
-      if((double) dy >= radius || (double) dy <= -radius)
+      ry = y2 - y0;
+      if((double) ry >= radius || (double) ry <= -radius)
         x2 = x0;
       else{
-        phi = asin( (double) dy / radius );
+        phi = asin( (double) ry / radius );
         x2 = x0 - (long) (radius * cos(phi));
       }
     }
@@ -198,11 +191,11 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
       sticky |= 4;
       y2--;
       y_axis.stepDown();
-      dy = y2 - y0;
-      if((double) dy >= radius || (double) dy <= -radius)
+      ry = y2 - y0;
+      if((double) ry >= radius || (double) ry <= -radius)
         x2 = x0;
       else{
-        phi = asin( (double) dy / radius );
+        phi = asin( (double) ry / radius );
         x2 = x0 + (long) (radius * cos(phi));
       }
     }
@@ -211,11 +204,11 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
       sticky |= 8;
       y2++;
       y_axis.stepUp();
-      dy = y2 - y0;
-      if((double) dy >= radius || (double) dy <= -radius)
+      ry = y2 - y0;
+      if((double) ry >= radius || (double) ry <= -radius)
         x2 = x0;
       else{
-        phi = asin( (double) dy / radius );
+        phi = asin( (double) ry / radius );
         x2 = x0 - (long) (radius * cos(phi));
       }
     }
@@ -223,9 +216,10 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
     x_axis.setPosition(x2);
 
     if(DEBUG){
+      rx = x2 - x0;
       dx = x3 - x2;
       dy = y3 - y2;
-      sprintf(cBuffer, "d(%ld, %ld), r(%ld, %ld) pos(%ld, %ld), phi=", dx, dy, rx, ry, x2, y2);
+      sprintf(cBuffer, "d(%ld, %ld), r(%ld, %ld) pos(%ld, %ld), s=%d, phi=", dx, dy, rx, ry, x2, y2, sticky);
       Serial.print(cBuffer);
       Serial.println(phi, 3);
     }

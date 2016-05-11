@@ -504,8 +504,8 @@ void setup(){
   // set up WDT interrupt
   wdt_reset();
   WDTCSR |= (1<<WDCE) | (1<<WDE); // change enable
-  WDTCSR = (1<<WDP2); // timeout = 250 ms 
-  //WDTCSR = (1<<WDP1); // timeout = 64 ms 
+  //WDTCSR = (1<<WDP2); // timeout = 250 ms 
+  WDTCSR = (1<<WDP1); // timeout = 64 ms 
   
   // attach external interrupt for the sensor
   attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);

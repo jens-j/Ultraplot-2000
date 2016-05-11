@@ -75,9 +75,11 @@ class Filter:
 
         while( not ( p is None) ):
 
-            if not (p[3] in self.seen):
-                print p[3]
-                self.seen.append(p[3])
+            s = p[3]
+
+            if not (s in self.seen):
+                print s
+                self.seen.append(s)
                 for line in p:
                     self.writeLine(line)
 

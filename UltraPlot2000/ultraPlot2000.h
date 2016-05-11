@@ -52,7 +52,7 @@
 /*********************************************************/
 /*	Constants			    
 /*********************************************************/
-#define DEBUG             1   // enables debug prints
+#define DEBUG             0   // enables debug prints
 #define BTN_DEBOUNCE_P    20  // button debounce period in ms
 #define BTN_RETRIGGER_P   300 // button retrigger period in ms
 #define X_STEPSIZE        0.0353 // in mm | Because the X resoluton is scaled to the Y resolution,
