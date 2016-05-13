@@ -219,7 +219,7 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
       rx = x2 - x0;
       dx = x3 - x2;
       dy = y3 - y2;
-      sprintf(cBuffer, "d(%ld, %ld), r(%ld, %ld) pos(%ld, %ld), s=%d, phi=", dx, dy, rx, ry, x2, y2, sticky);
+      sprintf(cBuffer, "d(%ld, %ld), r(%ld, %ld) pos(%ld, %ld), s=%x, phi=", dx, dy, rx, ry, x2, y2, sticky);
       Serial.print(cBuffer);
       Serial.println(phi, 3);
     }

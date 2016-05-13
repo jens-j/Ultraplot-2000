@@ -329,6 +329,7 @@ void executeGCode(){
   String s;
   char *c1,*c2, *c3, *c4;
   char cBuffer[100];
+  char eBuffer[10];
   char lcdBuffer[20];
   double x,y,z,i,j;
   long int count = 1;
@@ -343,23 +344,38 @@ void executeGCode(){
   
   plotter.moveHead(Z_UP);
   
-  while(1){
+  while(true){
     Serial.println("next");
     
-    while(Serial.available() == 0){
-      delayMicroseconds(1); 
+    // error correction: echo the string 
+    while(true){
+      // read string
+      while(Serial.available() == 0){
+        delayMicroseconds(1); 
+      }
+      s = Serial.readString(); 
+      s.toCharArray(cBuffer, 100);
+      // echo string
+      Serial.println(s);
+      // read error report
+      while(Serial.available() == 0){
+        delayMicroseconds(1); 
+      }
+      s = Serial.readString(); 
+      s.toCharArray(eBuffer, 10);
+      if( strstr(eBuffer, "good") ){
+        break;
+      }
+      delay(200);
     }
-    
-    s = Serial.readString(); 
-    s.toCharArray(cBuffer, 100);
     
     if(strstr(cBuffer, "%")){
       break;
     }
-
-    // echo the string
-    if(DEBUG)
-      Serial.println(s);
+    
+//    // echo the string
+//    if(DEBUG)
+//      Serial.println(s);
 
     lcd.setCursor(0, 1);
     
