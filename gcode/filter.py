@@ -2,8 +2,8 @@
 class Filter:
 
     def __init__(self):
-        self.fin = open("octopus_offset.ngc", "r")
-        self.fout = open("test.ngc", "w")
+        self.fin = open("octopus2_offset.ngc", "r")
+        self.fout = open("octopus2_offset_filtered.ngc", "w")
         self.count = 0 
         self.seen = []
 
