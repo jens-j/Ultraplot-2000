@@ -130,7 +130,6 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
   long dx, dy; // distance between the position and end point
   double phi; // angle of position
   double radius;
-  int sticky = 0;
 
   x1 = x2 = (long) x_axis.getPosition(); // in virtual coordinates. this should be the target of the previous move, not the actual position
   y1 = y2 = (long) y_axis.getPosition();
@@ -161,8 +160,6 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
     phi = -999; // for debug
     
     if(direction == CCW && (rx > 0 || (rx == 0 && ry < 0))){
-      //Serial.print("[CCW RH] ");
-      sticky |= 1;
       y2++;
       y_axis.stepUp();
       ry = y2 - y0;
@@ -174,8 +171,6 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
       }  
     } 
     else if(direction == CCW && (rx < 0 || (rx == 0 && ry > 0))){
-      //Serial.print("[CCW LH] ");
-      sticky |= 2;
       y2--;
       y_axis.stepDown();
       ry = y2 - y0;
@@ -187,8 +182,6 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
       }
     }
     else if(direction == CW && (rx > 0 || (rx == 0 && ry > 0))){
-      //Serial.print("[CW RH] ");
-      sticky |= 4;
       y2--;
       y_axis.stepDown();
       ry = y2 - y0;
@@ -200,8 +193,6 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
       }
     }
     else if(direction == CW && (rx < 0 || (rx == 0 && ry < 0))){
-      //Serial.print("[CW LH] ");
-      sticky |= 8;
       y2++;
       y_axis.stepUp();
       ry = y2 - y0;
@@ -219,14 +210,12 @@ void Plotter::arcAbsolute(long x3, long y3, long i, long j, int direction){
       rx = x2 - x0;
       dx = x3 - x2;
       dy = y3 - y2;
-      sprintf(cBuffer, "d(%ld, %ld), r(%ld, %ld) pos(%ld, %ld), s=%x, phi=", dx, dy, rx, ry, x2, y2, sticky);
+      sprintf(cBuffer, "d(%ld, %ld), r(%ld, %ld) pos(%ld, %ld), phi=", dx, dy, rx, ry, x2, y2);
       Serial.print(cBuffer);
       Serial.println(phi, 3);
     }
   }
-  if(sticky == 0xF || sticky == 0xE || sticky == 0xD || sticky == 0xB || sticky == 0x7){
-    panic("arc error?");
-  }
+  x_axis.setPosition(x3);
 }
 
 

@@ -17,7 +17,7 @@ X_axis::X_axis() : sensor() {
   sdata0 = 0;
   rPosition = 0;
   vPosition = (int) (rPosition * XY_SCALE);
-  bounds = {-4000, 4000};
+  bounds = {-8000, 8000};
   setPoint = 0;
   traveled = 0;
   quick = false;
@@ -290,7 +290,7 @@ x_direction_t X_axis::getDirection(){
 Y_axis::Y_axis() : 
 stepper(MOTOR_Y0, MOTOR_Y1, MOTOR_Y2, MOTOR_Y3, Y_STEPPER_PWM)
 {
-  bounds = {-6000, 6000};
+  bounds = {-20000, 20000};
   cooldownTime = micros();
 }
 
