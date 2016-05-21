@@ -342,7 +342,7 @@ void executeGCode(){
   lcd.setCursor(0, 0);
   lcd.print("[Executing GCode]");
   
-  plotter.moveHead(Z_UP);
+  //plotter.moveHead(Z_UP);
   
   while(true){
     Serial.println("next");
@@ -468,6 +468,7 @@ void executeGCode(){
       pausePos = plotter.z_axis.getPosition();
       plotter.moveHead(Z_UP);
 
+      plotter.saveState();
       printStatus();
       
       buttons.clearEvent();
@@ -520,8 +521,7 @@ void setup(){
   // set up WDT interrupt
   wdt_reset();
   WDTCSR |= (1<<WDCE) | (1<<WDE); // change enable
-  //WDTCSR = (1<<WDP2); // timeout = 250 ms 
-  WDTCSR = (1<<WDP1); // timeout = 64 ms 
+  WDTCSR = (1<<WDP2); // | (1<<WDP0); // timeout = 0.5 s
   
   // attach external interrupt for the sensor
   attachInterrupt(digitalPinToInterrupt(SENSOR_X0), sensorIsrDispatcher, CHANGE);

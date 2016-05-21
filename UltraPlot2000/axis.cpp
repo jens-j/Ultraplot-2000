@@ -42,6 +42,9 @@ void X_axis::getDiagnostics(int *diag){
 void X_axis::sensorIsr(){
   char buffer[20];
   wdt_reset();
+//  // after the first sensor interrupt, the head is moving and the wdt period is reduced to 64 ms
+//  WDTCSR |= (1<<WDCE) | (1<<WDE); // change enable
+//  WDTCSR = (1<<WDP1); // timeout = 64 ms 
   wdtCount = 0;
   int sdata = sensor.decodeSensor();
   
@@ -87,8 +90,8 @@ void X_axis::wdTimerIsr(){
   wdtCount++;
   stallCount++;
 
-  if( (int) pidOutput + wdtCount == X_PWM_MAX + 1){
-     sprintf(cBuffer, "wdt ovf (%d, %d)", setPoint - rPosition, traveled);
+  if( (int) pidOutput + wdtCount == X_PWM_MAX + 10 ){
+     sprintf(cBuffer, "wdt %d,%d,%d,%d", setPoint - rPosition, traveled, pidOutput, wdtCount);
      panic(cBuffer);
   }
   else{
@@ -236,7 +239,8 @@ void X_axis::initMove(int setp){
    
   // flag the start of a new move
   traveled = 0;
-  kickoff = true;
+  wdtCount = 0;
+  kickoff  = true;
 
   // set direction and speed
   direction = IDLE;
@@ -249,10 +253,14 @@ void X_axis::initMove(int setp){
     setSpeed(); 
   }  
   
-  // enable watchdog timer interrupt
+  // set period to 0.5s and enable the watchdog timer interrupt 
   if( direction != IDLE ){
+//    noInterrupts();
+//    WDTCSR |= (1<<WDCE) | (1<<WDE); // change enable
+//    WDTCSR = (1<<WDP2) | (1<<WDP0); // timeout = 0.5 s
     wdt_reset();  
     WDTCSR |= (1<<WDIE); 
+    //interrupts();
   }
 }
 

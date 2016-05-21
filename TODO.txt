@@ -1,6 +1,9 @@
 BUGS
-- wtf.log
-- non-responsive panic menu on x out of bounds and wdt overflow
+- 160mm in calibration is not 160mm ?
+	-> also should be 260mm (wtf)
+- wdt overflow occurs without serial prints
+- panic is called inside ISRs making the plotter unresponsive
+	-> use assembly to reenable interrupts without jumping back
 
 SMALL FEATURES
 - frame/limit setting to center images
@@ -9,5 +12,8 @@ SMALL FEATURES
 
 BIG FEATURES
 - brown-out save routine
+- CRC for serial communication
+- buffer GCode commands to avoid stalls between operations
+- email or text message on panic or completion
 
 NOT TESTED:

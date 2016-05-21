@@ -1,0 +1,6 @@
+Batman2:
+	Done with -0.1 for the outline, -0.2 for the hatching cutout.
+	The hatching occasionally protrudes the outline.
+	Next time try: -0.1, -0,25.
+
+	The hatching period is 1000/180mm.
